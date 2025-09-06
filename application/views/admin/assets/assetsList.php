@@ -1,0 +1,218 @@
+<?php
+$currency_symbol = $this->customlib->getSchoolCurrencyFormat();
+?>
+<div class="content-wrapper">
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><?php echo $this->lang->line('add'); ?> <?php echo $this->lang->line('assets'); ?></h3>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <form id="employeeform" action="<?php echo base_url() ?>admin/assets/index" name="employeeform" method="post" accept-charset="utf-8">
+                                    <div class="box-body">
+                                        <?php if ($this->session->flashdata('msg')) { ?>
+                                            <?php echo $this->session->flashdata('msg') ?>
+                                        <?php } ?>
+                                        <?php echo $this->customlib->getCSRF(); ?>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="name"><?php echo $this->lang->line('name'); ?></label><small class="req"> *</small>
+                                                    <input autofocus="" id="name" name="name" placeholder="<?php echo $this->lang->line('enter_name'); ?>" type="text" class="form-control"  value="<?php echo set_value('name'); ?>" required/>
+                                                    <span class="text-danger"><?php echo form_error('name'); ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="category"><?php echo $this->lang->line('category'); ?></label>
+                                                    <input id="category" name="category" placeholder="<?php echo $this->lang->line('enter_category'); ?>" type="text" class="form-control"  value="<?php echo set_value('category'); ?>" />
+                                                    <span class="text-danger"><?php echo form_error('category'); ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label for="description"><?php echo $this->lang->line('description'); ?></label><small class="req"></small>
+                                                    <textarea id="description" name="description" placeholder="<?php echo $this->lang->line('enter_description'); ?>" type="text" class="form-control"><?php echo set_value('description'); ?></textarea>
+                                                    <span class="text-danger"><?php echo form_error('description'); ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="purchase_date"><?php echo $this->lang->line('purchase_date'); ?></label><small class="req"> *</small>
+                                                    <input id="purchase_date" name="purchase_date" placeholder="<?php echo $this->lang->line('select_date'); ?>" type="text" class="form-control date"  value="<?php echo set_value('purchase_date'); ?>" required/>
+                                                    <span class="text-danger"><?php echo form_error('purchase_date'); ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="price"><?php echo $this->lang->line('price'); ?></label><small class="req"> *</small>
+                                                    <input id="price" name="price" placeholder="<?php echo $this->lang->line('enter_price'); ?>" type="number" class="form-control"  value="<?php echo set_value('price'); ?>" required/>
+                                                    <span class="text-danger"><?php echo form_error('price'); ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="residu"><?php echo $this->lang->line('residu'); ?></label><small class="req"> *</small>
+                                                    <input id="residu" name="residu" placeholder="<?php echo $this->lang->line('enter_residu'); ?>" type="number" class="form-control"  value="<?php echo set_value('residu'); ?>" required/>
+                                                    <span class="text-danger"><?php echo form_error('residu'); ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="aging"><?php echo $this->lang->line('aging'); ?></label><small class="req"> *</small>
+                                                    <input id="aging" name="aging" placeholder="<?php echo $this->lang->line('enter_aging'); ?>" type="number" class="form-control"  value="<?php echo set_value('aging'); ?>" required/>
+                                                    <span class="text-danger"><?php echo form_error('aging'); ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="metode"><?php echo $this->lang->line('metode'); ?></label><small class="req"> *</small>
+                                                    <select id="metode" name="metode" class="form-control" required>
+                                                        <option value="1">Garis Lurus</option>
+                                                        <option value="0">Tanpa Penyusutan</option>
+                                                    </select>
+                                                    <span class="text-danger"><?php echo form_error('metode'); ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label><?php echo $this->lang->line('depresiasi'); ?>/Tahun</label>
+                                                    <p class="form-control-static" id="depresiasi_value">0</p>
+                                                    <input type="hidden" id="depresiasi" name="depresiasi" value="0" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="box-footer">
+                                        <button type="submit" class="btn btn-info pull-right"><?php echo $this->lang->line('save'); ?></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><?php echo $this->lang->line('assets'); ?> <?php echo $this->lang->line('list'); ?></h3>
+                        <div class="box-tools pull-right">
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-hover example" cellspacing="0" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th><?php echo $this->lang->line('name'); ?></th>
+                                                <th><?php echo $this->lang->line('description'); ?></th>
+                                                <th><?php echo $this->lang->line('purchase_date'); ?></th>
+                                                <th><?php echo $this->lang->line('category'); ?></th>
+                                                <th><?php echo $this->lang->line('price'); ?></th>
+                                                <th><?php echo $this->lang->line('residu'); ?></th>
+                                                <th><?php echo $this->lang->line('depresiasi'); ?>/Bulan</th>
+                                                <th><?php echo $this->lang->line('accumulated_depresiasi'); ?></th>
+                                                <th><?php echo $this->lang->line('current_book_value'); ?></th>
+                                                <th><?php echo $this->lang->line('aging'); ?></th>
+                                                <th><?php echo $this->lang->line('metode'); ?></th>
+                                                <th class="text-right"><?php echo $this->lang->line('action'); ?></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            if (!empty($assetslist)) {
+                                                foreach ($assetslist as $assets) {
+                                                    // Calculate monthly depreciation for display
+                                                    $monthly_depreciation = 0;
+                                                    if ($assets['metode'] == 1 && $assets['aging'] > 0) {
+                                                        $monthly_depreciation = $assets['depresiasi'] / 12;
+                                                    }
+                                                    ?>
+                                                    <tr>
+                                                        <td><?php echo $assets['name']; ?></td>
+                                                        <td><?php echo $assets['description']; ?></td>
+                                                        <td><?php echo date($this->customlib->getSchoolDateFormat(), strtotime($assets['purchase_date'])); ?></td>
+                                                        <td><?php echo $assets['category']; ?></td>
+                                                        <td><?php echo $currency_symbol . $assets['price']; ?></td>
+                                                        <td><?php echo $currency_symbol . round($assets['residu'], 2); ?></td>
+                                                        <td><?php echo $currency_symbol . round($monthly_depreciation, 2); ?></td>
+                                                        <td><?php echo $currency_symbol . round($assets['accumulated_depreciation'], 2); ?></td>
+                                                        <td><?php echo $currency_symbol . round($assets['current_book_value'], 2); ?></td>
+                                                        <td><?php echo $assets['aging']; ?></td>
+                                                        <td><?php echo ($assets['metode'] == 1) ? 'Garis Lurus' : 'Tanpa Penyusutan'; ?></td>
+                                                        <td class="text-right">
+                                                            <?php if ($this->rbac->hasPrivilege('assets', 'can_edit')) { ?>
+                                                                <a href="<?php echo base_url(); ?>admin/assets/edit/<?php echo $assets['id'] ?>" class="btn btn-default btn-xs" data-toggle="tooltip" title="<?php echo $this->lang->line('edit'); ?>">
+                                                                    <i class="fa fa-pencil"></i>
+                                                                </a>
+                                                            <?php } if ($this->rbac->hasPrivilege('assets', 'can_delete')) { ?>
+                                                                <a href="<?php echo base_url(); ?>admin/assets/delete/<?php echo $assets['id'] ?>" class="btn btn-default btn-xs" data-toggle="tooltip" title="<?php echo $this->lang->line('delete'); ?>" onclick="return confirm('<?php echo $this->lang->line('delete_confirm') ?>');">
+                                                                    <i class="fa fa-remove"></i>
+                                                                </a>
+                                                            <?php } ?>
+                                                        </td>
+                                                    </tr>
+                                                    <?php
+                                                }
+                                            }
+                                            ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </section>
+</div>
+<script>
+    $(document).ready(function () {
+        $('.date').datepicker({
+            format: "dd-mm-yyyy",
+            autoclose: true
+        });
+        
+        // Calculate depreciation when price, residu, aging, or metode changes
+        $('#price, #residu, #aging, #metode').on('input change', function() {
+            calculateDepreciation();
+        });
+        
+        function calculateDepreciation() {
+            var price = parseFloat($('#price').val()) || 0;
+            var residu = parseFloat($('#residu').val()) || 0;
+            var aging = parseFloat($('#aging').val()) || 0;
+            var metode = $('#metode').val();
+            
+            var depresiasi = 0;
+            // If metode is "Garis Lurus" (value = 1) and aging > 0, calculate depreciation
+            if (metode == '1' && aging > 0) {
+                depresiasi = (price - residu) / aging;
+            }
+            
+            // Convert to monthly depreciation for display
+            var monthly_depresiasi = depresiasi / 12;
+            $('#depresiasi_value').text(monthly_depresiasi.toFixed(2));
+            $('#depresiasi').val(depresiasi.toFixed(2)); // Keep annual value in hidden field
+        }
+        
+        // Calculate initial depreciation
+        calculateDepreciation();
+    });
+</script>
