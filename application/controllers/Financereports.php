@@ -1631,7 +1631,10 @@ class Financereports extends Admin_Controller
                     // Using preg_replace to remove non-digit characters from quantity
                     $quantity = isset($value->quantity) ? preg_replace('/[^0-9.]/', '', $value->quantity) : 0;
                     $price = isset($value->purchase_price) ? $value->purchase_price : 0;
-                    $amount = $quantity * $price;
+                    if($quantity > 0){
+                        $amount = $price;
+                    }
+                    // $amount = $price;
                     
                     $inventory_data[] = array(
                         'name' => isset($value->name) ? $value->name : 'Unknown Item',
@@ -1669,7 +1672,7 @@ class Financereports extends Admin_Controller
                     // Calculate total amount (quantity * perunitcost)
                     $quantity = isset($value->qty) ? $value->qty : 0;
                     $price = isset($value->perunitcost) ? $value->perunitcost : 0;
-                    $amount = $quantity * $price;
+                    $amount = $price;
                     
                     $book_data[] = array(
                         'name' => isset($value->book_title) ? $value->book_title : 'Unknown Book',

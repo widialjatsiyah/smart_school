@@ -123,8 +123,8 @@
                                             echo '</tr>';
                                         ?>
                                         
-                                        <tr>
-                                            <td class="text-right"><b><?php echo $this->lang->line('total_income'); ?></b></td>
+                                        <tr style="border-top: 2px solid #ccc;">
+                                            <td><b><?php echo $this->lang->line('total_income'); ?></b></td>
                                             <td class="text-right"><b><?php echo $currency_symbol .' ' . amountFormat($total_income); ?></b></td>
                                         </tr>
                                         
@@ -184,7 +184,7 @@
                                             }
 
                                             echo '<tr>';
-                                            echo '<th>' . $this->lang->line('payroll_report') . '</th>';
+                                            echo '<th>&nbsp;&nbsp;&nbsp;&nbsp;' . $this->lang->line('payroll_report') . '</th>';
                                             echo '<th class="text-right">' . $currency_symbol . amountFormat($total_payroll) . '</th>';
                                             echo '</tr>';
                                         ?>
@@ -203,21 +203,21 @@
 
                                             // Display depreciation row in report
                                             echo '<tr>';
-                                            echo '<th>' . $this->lang->line('depreciation_report') . '</th>';
+                                            echo '<th>&nbsp;&nbsp;&nbsp;&nbsp;' . $this->lang->line('depreciation_report') . '</th>';
                                             echo '<th class="text-right">' . $currency_symbol . ' ' . amountFormat($total_depreciation) . '</th>';
                                             echo '</tr>';
                                         ?>
                                         
                                         <?php
                                             echo '<tr>';
-                                            echo '<th>' . $this->lang->line('book_inventory') . '</th>';
+                                            echo '<th>&nbsp;&nbsp;&nbsp;&nbsp;' . $this->lang->line('book_inventory') . '</th>';
                                             echo '<th class="text-right">' . $currency_symbol .' ' . amountFormat($total_bookinventory) . '</th>';
                                             echo '</tr>';
                                         ?>
                                         
                                         <?php
                                             echo '<tr>';
-                                            echo '<th>' . $this->lang->line('inventory_purchase') . '</th>';
+                                            echo '<th>&nbsp;&nbsp;&nbsp;&nbsp;' . $this->lang->line('inventory_purchase') . '</th>';
                                             echo '<th class="text-right">' . $currency_symbol .' ' . amountFormat($total_inventory) . '</th>';
                                             echo '</tr>';
                                         ?>
@@ -228,7 +228,7 @@
                                         </tr>
                                         <tr>
                                             <td class="text-right"><b><?php echo ($profit_loss >= 0) ? $this->lang->line('profit') : $this->lang->line('loss'); ?></b></td>
-                                            <td class="text-right"><b><?php echo $currency_symbol .' ' . amountFormat(abs($profit_loss)); ?></b></td>
+                                            <td class="text-right"><b><?php echo $currency_symbol .' ' . amountFormat($profit_loss); ?></b></td>
                                         </tr>
                                     </tbody>
                                 </table>
