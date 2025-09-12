@@ -2492,3 +2492,4 @@ $lang['fee_billing_report'] = 'Laporan Penagihan Biaya';
 $lang['payroll_report'] = 'Laporan Penggajian';
 $lang['depreciation_report'] = 'Laporan Depresiasi';
 $lang['inventory_purchase'] = 'Pembelian Inventaris';
+$lang['class_teacher_or_supervisor'] = 'Guru Kelas / Pengawas';

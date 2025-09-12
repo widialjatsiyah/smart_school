@@ -2481,3 +2481,5 @@ $lang['whatsapp_link'] = "Whatsapp Link";
 $lang['whatsapp_settings'] = "Whatsapp Settings";
 $lang['processing_fees_type'] = "Processing Fees Type";
 $lang['percentage_fix_amount'] = "Percentage/Fix Amount";
+
+$lang['class_teacher_or_supervisor'] = 'Class Teacher / Supervisor';

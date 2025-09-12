@@ -63,7 +63,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1"><?php echo $this->lang->line('class_teacher'); ?></label><small class="req"> *</small>
+                                    <label for="exampleInputEmail1"><?php echo $this->lang->line('class_teacher_or_supervisor'); ?></label><small class="req"> *</small>
 
 
                                     <?php
