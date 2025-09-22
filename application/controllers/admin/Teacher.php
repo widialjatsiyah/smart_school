@@ -21,8 +21,8 @@ class Teacher extends Admin_Controller
         $this->session->set_userdata('top_menu', 'Academics');
         $this->session->set_userdata('sub_menu', 'teacher/index');
         $data['title']       = 'Add Teacher';
-        $data['teacherlist'] = $this->teacher_model->get();         
-        $data['genderList']  = $this->customlib->getGender(); 
+        $data['teacherlist'] = $this->teacher_model->get();
+        $data['genderList']  = $this->customlib->getGender();
         $this->load->view('layout/header', $data);
         $this->load->view('admin/teacher/teacherList', $data);
         $this->load->view('layout/footer', $data);
@@ -251,9 +251,11 @@ class Teacher extends Admin_Controller
             if ($_FILES["file"]["error"] > 0) {
                 $error .= "Error opening the file<br />";
             }
-            if ($_FILES["file"]["type"] != 'image/gif' &&
+            if (
+                $_FILES["file"]["type"] != 'image/gif' &&
                 $_FILES["file"]["type"] != 'image/jpeg' &&
-                $_FILES["file"]["type"] != 'image/png') {
+                $_FILES["file"]["type"] != 'image/png'
+            ) {
 
                 $this->form_validation->set_message('handle_upload', $this->lang->line('file_type_not_allowed'));
                 return false;
@@ -346,7 +348,9 @@ class Teacher extends Admin_Controller
         $data['title_list'] = 'Class List';
 
         $this->form_validation->set_rules(
-            'class', $this->lang->line('class'), array(
+            'class',
+            $this->lang->line('class'),
+            array(
                 'required',
                 array('class_exists', array($this->class_model, 'class_teacher_exists')),
             )
@@ -355,7 +359,6 @@ class Teacher extends Admin_Controller
         $this->form_validation->set_rules('teachers[]', $this->lang->line('class_teacher'), 'trim|required|xss_clean');
 
         if ($this->form_validation->run() == false) {
-
         } else {
 
             $class    = $this->input->post("class");
@@ -368,14 +371,16 @@ class Teacher extends Admin_Controller
                 $classteacherid = $this->input->post("classteacherid");
                 if (isset($classteacherid)) {
 
-                    $data = array('id' => $classteacherid[$i],
+                    $data = array(
+                        'id' => $classteacherid[$i],
                         'class_id'         => $class,
                         'section_id'       => $section,
                         'staff_id'         => $teachers[$i],
                         'session_id'       => $this->current_session,
                     );
                 } else {
-                    $data = array('class_id' => $class,
+                    $data = array(
+                        'class_id' => $class,
                         'section_id'             => $section,
                         'staff_id'               => $teachers[$i],
                         'session_id'             => $this->current_session,
@@ -405,7 +410,7 @@ class Teacher extends Admin_Controller
         if (!empty($tlist)) {
             $data["tlist"] = $tlist;
         }
-        $teacherlist = $this->staff_model->getStaffbyroleIn([2,8,14]);
+        $teacherlist = $this->staff_model->getStaffbyroleIn([2, 8, 14]);
 
         $data['teacherlist'] = $teacherlist;
 
@@ -456,7 +461,9 @@ class Teacher extends Admin_Controller
         $data['title_list'] = 'Class List';
 
         $this->form_validation->set_rules(
-            'class', $this->lang->line('class'), array(
+            'class',
+            $this->lang->line('class'),
+            array(
                 'required',
                 array('class_exists', array($this->class_model, 'class_teacher_exists')),
             )
@@ -479,7 +486,9 @@ class Teacher extends Admin_Controller
             }
 
             $data["tlist"]       = $tlist;
-            $teacherlist         = $this->staff_model->getStaffbyrole($role = 2);
+
+            $teacherlist = $this->staff_model->getStaffbyroleIn([2, 8, 14]);
+            // $teacherlist         = $this->staff_model->getStaffbyrole($role = 2);
             $data['teacherlist'] = $teacherlist;
             $data['class_id'] = $class_id;
             $data['section_id'] = $section_id;
@@ -556,5 +565,4 @@ class Teacher extends Admin_Controller
             redirect("admin/teacher/assign_class_teacher");
         }
     }
-
 }

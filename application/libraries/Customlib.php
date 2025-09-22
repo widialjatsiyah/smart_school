@@ -2111,7 +2111,7 @@ class Customlib
     {
         $userdata            = $this->getUserData();
         $class_section_array = array();
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes")) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes")) {
             $my_class = $this->CI->class_model->get();
             foreach ($my_class as $class_key => $class_value) {
                 $section = $this->CI->section_model->getClassBySection($class_value['id']);
@@ -2129,7 +2129,7 @@ class Customlib
     {
         $userdata            = $this->getUserData();
         $class_section_array = array();
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes")) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes")) {
             $my_class = $this->CI->class_model->get();
             foreach ($my_class as $class_key => $class_value) {
                 $section = $this->CI->section_model->getClassBySection($class_value['id']);

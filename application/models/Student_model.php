@@ -51,7 +51,7 @@ class Student_model extends MY_Model
 
         $query  = $this->db->get();
         $result = $query->result_array();
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
             $result = array();
         }
         return $result;
@@ -451,7 +451,7 @@ class Student_model extends MY_Model
         $this->db->order_by('students.id');
         $query  = $this->db->get();
         $result = $query->result_array();
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
             $result = array();
         }
         return $result;
@@ -475,7 +475,7 @@ class Student_model extends MY_Model
 
         $field_variable = implode(',', $field_var_array);
 
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes")) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes")) {
             if (!empty($carray)) {
                 $this->db->where_in("student_session.class_id", $carray);
                 $sections = $this->teacher_model->get_teacherrestricted_modeallsections($staff_id);
@@ -598,7 +598,7 @@ class Student_model extends MY_Model
         $this->datatables->orderable('class_id,section_id,admission_no,students.firstname,students.father_name,students.dob,students.guardian_phone');
         $this->datatables->from('students');
         $std_data = $this->datatables->generate('json');
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
             $std_data       = json_decode($std_data);
             $std_data->data = array();
             return json_encode($std_data);
@@ -659,7 +659,7 @@ class Student_model extends MY_Model
         $query = $this->db->get();
 
         $result = $query->result_array();
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
             $result = array();
         }
 
@@ -800,7 +800,7 @@ class Student_model extends MY_Model
         $this->db->order_by('students.id');
         $query  = $this->db->get();
         $result = $query->result_array();
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
             $result = array();
         }
         return $result;
@@ -904,7 +904,7 @@ class Student_model extends MY_Model
         }
 
         $field_variable = implode(',', $field_var_array);
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes")) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes")) {
             if (!empty($carray)) {
 
                 $this->db->where_in("student_session.class_id", $carray);
@@ -944,7 +944,7 @@ class Student_model extends MY_Model
         }
 
         $field_variable = implode(',', $field_var_array);
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes")) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes")) {
             if (!empty($carray)) {
                 $this->db->where_in("student_session.class_id", $carray);
             } else {
@@ -1260,7 +1260,7 @@ class Student_model extends MY_Model
         $this->db->limit(15);
         $query  = $this->db->get();
         $result = $query->result_array();
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
             $result = array();
         }
         return $result;
@@ -1331,7 +1331,7 @@ class Student_model extends MY_Model
         $this->db->join("sections", "student_session.section_id = sections.id");
         $this->db->where("students.is_active", "yes");
         $this->db->where('student_session.session_id', $this->current_session);
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes")) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes")) {
             if (!empty($carray)) {
                 $this->db->where_in("student_session.class_id", $carray);
             } else {
@@ -1358,7 +1358,7 @@ class Student_model extends MY_Model
     public function studentAdmissionDetails($carray = null)
     {
         $userdata = $this->customlib->getUserData();
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes")) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes")) {
             if (!empty($carray)) {
                 $this->db->where_in("student_session.class_id", $carray);
             } else {
@@ -1572,7 +1572,7 @@ class Student_model extends MY_Model
         $this->db->order_by('students.id');
         $query  = $this->db->get();
         $result = $query->result_array();
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
             $result = array();
         }
         return $result;
@@ -1855,7 +1855,7 @@ class Student_model extends MY_Model
         $userdata = $this->customlib->getUserData();
         $staff_id = $userdata['id'];
 
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes")) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes")) {
             if (!empty($carray)) {
 
                 $this->db->where_in("student_session.class_id", $carray);
@@ -1951,7 +1951,7 @@ class Student_model extends MY_Model
     {
         $userdata = $this->customlib->getUserData();        
         
-		if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
+		if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
             $class_section_array = $this->customlib->get_myClassSection();
         }
         
@@ -2014,8 +2014,10 @@ class Student_model extends MY_Model
 
         $i             = 1;
         $custom_fields = $this->customfield_model->get_custom_fields('students', 1);
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
             $class_section_array = $this->customlib->get_myClassSection();
+            // var_dump($class_section_array);
+            // die();
         }      
 
         $field_var_array      = array();
@@ -2063,7 +2065,7 @@ class Student_model extends MY_Model
         $this->datatables->from('students');
         $std_data = $this->datatables->generate('json');
 
-        if (($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
+        if (($userdata["role_id"] == 2 || $userdata["role_id"] == 14) && ($userdata["class_teacher"] == "yes") && (empty($class_section_array))) {
             $std_data       = json_decode($std_data);
             $std_data->data = array();
             return json_encode($std_data);
