@@ -44,6 +44,7 @@ class Expense extends Admin_Controller
                 'invoice_no'  => $this->input->post('invoice_no'),
                 'note'        => $this->input->post('description'),
                 'documents'   => $img_name,
+                'class_id'    => $this->input->post('class_id'),
             );
 
             $insert_id = $this->expense_model->add($data);        
@@ -55,6 +56,8 @@ class Expense extends Admin_Controller
         $data['expenselist'] = $expense_result;
         $expnseHead          = $this->expensehead_model->get();
         $data['expheadlist'] = $expnseHead;
+        $class               = $this->class_model->get();
+        $data['classlist']   = $class;
         $this->load->view('layout/header', $data);
         $this->load->view('admin/expense/expenseList', $data);
         $this->load->view('layout/footer', $data);
@@ -185,6 +188,8 @@ class Expense extends Admin_Controller
         $data['expenselist'] = $expense_result;
         $expnseHead          = $this->expensehead_model->get();
         $data['expheadlist'] = $expnseHead;
+        $class               = $this->class_model->get();
+        $data['classlist']   = $class;
         $this->form_validation->set_rules('exp_head_id', $this->lang->line('expense_head'), 'trim|required|xss_clean');
         $this->form_validation->set_rules('documents', $this->lang->line('documents'), 'callback_handle_upload');
         $this->form_validation->set_rules('amount', $this->lang->line('amount'), 'trim|required|numeric|xss_clean');
@@ -203,6 +208,7 @@ class Expense extends Admin_Controller
                 'date'        => date('Y-m-d', $this->customlib->datetostrtotime($this->input->post('date'))),
                 'amount'      => convertCurrencyFormatToBaseAmount($this->input->post('amount')),
                 'note'        => $this->input->post('description'),
+                'class_id'    => $this->input->post('class_id'),
             );
 
             if (isset($_FILES["documents"]) && $_FILES['documents']['name'] != '' && (!empty($_FILES['documents']['name']))) {
@@ -273,7 +279,7 @@ class Expense extends Admin_Controller
                     $row[] = $value->note;
                 }
 
-                $row[]     = $value->invoice_no;
+                $row[]     = '[ ' . $value->class . ' ] ' . $value->invoice_no;
                 $row[]     = date($this->customlib->getSchoolDateFormat(), $this->customlib->dateyyyymmddTodateformat($value->date));
                 $row[]     = $value->exp_category;
                 $row[]     = $currency_symbol . amountFormat($value->amount);
