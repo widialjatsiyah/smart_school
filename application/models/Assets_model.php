@@ -15,9 +15,9 @@ class Assets_model extends MY_Model
 
     public function get($id = null)
     {   
-        $this->db->select('*');
+        $this->db->select('assets.*, classes.class AS class');
         $this->db->from('assets');
-        
+        $this->db->join('classes', 'classes.id = assets.class_id', 'left');
         if ($id != null) {
             $this->db->where('id', $id);
             $query = $this->db->get();

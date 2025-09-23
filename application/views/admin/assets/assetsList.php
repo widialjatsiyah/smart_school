@@ -23,18 +23,39 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                         <?php } ?>
                                         <?php echo $this->customlib->getCSRF(); ?>
                                         <div class="row">
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="name"><?php echo $this->lang->line('name'); ?></label><small class="req"> *</small>
-                                                    <input autofocus="" id="name" name="name" placeholder="<?php echo $this->lang->line('enter_name'); ?>" type="text" class="form-control"  value="<?php echo set_value('name'); ?>" required/>
+                                                    <input autofocus="" id="name" name="name" placeholder="<?php echo $this->lang->line('enter_name'); ?>" type="text" class="form-control" value="<?php echo set_value('name'); ?>" required />
                                                     <span class="text-danger"><?php echo form_error('name'); ?></span>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="category"><?php echo $this->lang->line('category'); ?></label>
-                                                    <input id="category" name="category" placeholder="<?php echo $this->lang->line('enter_category'); ?>" type="text" class="form-control"  value="<?php echo set_value('category'); ?>" />
+                                                    <input id="category" name="category" placeholder="<?php echo $this->lang->line('enter_category'); ?>" type="text" class="form-control" value="<?php echo set_value('category'); ?>" />
                                                     <span class="text-danger"><?php echo form_error('category'); ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label><?php echo $this->lang->line('class'); ?></label> <small class="req"> *</small>
+                                                    <select autofocus="" id="class_id" name="class_id" class="form-control">
+                                                        <option value=""><?php echo $this->lang->line('select'); ?></option>
+                                                        <?php
+                                                        $count = 0;
+                                                        foreach ($classlist as $class) {
+                                                        ?>
+                                                            <option value="<?php echo $class['id'] ?>" <?php if (set_value('class_id') == $class['id']) {
+                                                                                                            echo "selected=selected";
+                                                                                                        }
+                                                                                                        ?>><?php echo $class['class'] ?></option>
+                                                        <?php
+                                                            $count++;
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                    <span class="text-danger" id="error_class_id"></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -51,21 +72,21 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="purchase_date"><?php echo $this->lang->line('purchase_date'); ?></label><small class="req"> *</small>
-                                                    <input id="purchase_date" name="purchase_date" placeholder="<?php echo $this->lang->line('select_date'); ?>" type="text" class="form-control date"  value="<?php echo set_value('purchase_date'); ?>" required/>
+                                                    <input id="purchase_date" name="purchase_date" placeholder="<?php echo $this->lang->line('select_date'); ?>" type="text" class="form-control date" value="<?php echo set_value('purchase_date'); ?>" required />
                                                     <span class="text-danger"><?php echo form_error('purchase_date'); ?></span>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="price"><?php echo $this->lang->line('price'); ?></label><small class="req"> *</small>
-                                                    <input id="price" name="price" placeholder="<?php echo $this->lang->line('enter_price'); ?>" type="number" class="form-control"  value="<?php echo set_value('price'); ?>" required/>
+                                                    <input id="price" name="price" placeholder="<?php echo $this->lang->line('enter_price'); ?>" type="number" class="form-control" value="<?php echo set_value('price'); ?>" required />
                                                     <span class="text-danger"><?php echo form_error('price'); ?></span>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="residu"><?php echo $this->lang->line('residu'); ?></label><small class="req"> *</small>
-                                                    <input id="residu" name="residu" placeholder="<?php echo $this->lang->line('enter_residu'); ?>" type="number" class="form-control"  value="<?php echo set_value('residu'); ?>" required/>
+                                                    <input id="residu" name="residu" placeholder="<?php echo $this->lang->line('enter_residu'); ?>" type="number" class="form-control" value="<?php echo set_value('residu'); ?>" required />
                                                     <span class="text-danger"><?php echo form_error('residu'); ?></span>
                                                 </div>
                                             </div>
@@ -74,7 +95,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="aging"><?php echo $this->lang->line('aging'); ?></label><small class="req"> *</small>
-                                                    <input id="aging" name="aging" placeholder="<?php echo $this->lang->line('enter_aging'); ?>" type="number" class="form-control"  value="<?php echo set_value('aging'); ?>" required/>
+                                                    <input id="aging" name="aging" placeholder="<?php echo $this->lang->line('enter_aging'); ?>" type="number" class="form-control" value="<?php echo set_value('aging'); ?>" required />
                                                     <span class="text-danger"><?php echo form_error('aging'); ?></span>
                                                 </div>
                                             </div>
@@ -105,7 +126,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="box box-primary">
                     <div class="box-header with-border">
                         <h3 class="box-title"><?php echo $this->lang->line('assets'); ?> <?php echo $this->lang->line('list'); ?></h3>
@@ -142,10 +163,10 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                                     if ($assets['metode'] == 1 && $assets['aging'] > 0) {
                                                         $monthly_depreciation = $assets['depresiasi'] / 12;
                                                     }
-                                                    ?>
+                                            ?>
                                                     <tr>
                                                         <td><?php echo $assets['name']; ?></td>
-                                                        <td><?php echo $assets['description']; ?></td>
+                                                        <td><?php echo '[ '.$assets['class'].' ] '.$assets['description']; ?></td>
                                                         <td><?php echo date($this->customlib->getSchoolDateFormat(), strtotime($assets['purchase_date'])); ?></td>
                                                         <td><?php echo $assets['category']; ?></td>
                                                         <td><?php echo $currency_symbol . $assets['price']; ?></td>
@@ -160,14 +181,15 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                                                 <a href="<?php echo base_url(); ?>admin/assets/edit/<?php echo $assets['id'] ?>" class="btn btn-default btn-xs" data-toggle="tooltip" title="<?php echo $this->lang->line('edit'); ?>">
                                                                     <i class="fa fa-pencil"></i>
                                                                 </a>
-                                                            <?php } if ($this->rbac->hasPrivilege('assets', 'can_delete')) { ?>
+                                                            <?php }
+                                                            if ($this->rbac->hasPrivilege('assets', 'can_delete')) { ?>
                                                                 <a href="<?php echo base_url(); ?>admin/assets/delete/<?php echo $assets['id'] ?>" class="btn btn-default btn-xs" data-toggle="tooltip" title="<?php echo $this->lang->line('delete'); ?>" onclick="return confirm('<?php echo $this->lang->line('delete_confirm') ?>');">
                                                                     <i class="fa fa-remove"></i>
                                                                 </a>
                                                             <?php } ?>
                                                         </td>
                                                     </tr>
-                                                    <?php
+                                            <?php
                                                 }
                                             }
                                             ?>
@@ -179,39 +201,39 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                     </div>
                 </div>
             </div>
-        </div> 
+        </div>
     </section>
 </div>
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         $('.date').datepicker({
             format: "dd-mm-yyyy",
             autoclose: true
         });
-        
+
         // Calculate depreciation when price, residu, aging, or metode changes
         $('#price, #residu, #aging, #metode').on('input change', function() {
             calculateDepreciation();
         });
-        
+
         function calculateDepreciation() {
             var price = parseFloat($('#price').val()) || 0;
             var residu = parseFloat($('#residu').val()) || 0;
             var aging = parseFloat($('#aging').val()) || 0;
             var metode = $('#metode').val();
-            
+
             var depresiasi = 0;
             // If metode is "Garis Lurus" (value = 1) and aging > 0, calculate depreciation
             if (metode == '1' && aging > 0) {
                 depresiasi = (price - residu) / aging;
             }
-            
+
             // Convert to monthly depreciation for display
             var monthly_depresiasi = depresiasi / 12;
             $('#depresiasi_value').text(monthly_depresiasi.toFixed(2));
             $('#depresiasi').val(depresiasi.toFixed(2)); // Keep annual value in hidden field
         }
-        
+
         // Calculate initial depreciation
         calculateDepreciation();
     });

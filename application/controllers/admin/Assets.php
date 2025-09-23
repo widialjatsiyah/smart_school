@@ -28,6 +28,8 @@ class Assets extends Admin_Controller
         $data['title'] = 'Add Assets';
         $data['title_list'] = 'Assets List';
 
+        $class               = $this->class_model->get();
+        $data['classlist']   = $class;
         $this->form_validation->set_rules('name', $this->lang->line('name'), 'trim|required|xss_clean');
         // $this->form_validation->set_rules('description', $this->lang->line('description'), 'trim|required|xss_clean');
         $this->form_validation->set_rules('purchase_date', $this->lang->line('purchase_date'), 'trim|required|xss_clean');
@@ -78,6 +80,7 @@ class Assets extends Admin_Controller
                 'depresiasi' => round($depresiasi, 2),
                 'aging' => $aging,
                 'metode' => $metode,
+                'class_id' => $this->input->post('class_id')
             );
             
             $this->assets_model->add($data);
@@ -164,6 +167,8 @@ class Assets extends Admin_Controller
         $asset = $this->assets_model->get_with_accumulated_depreciation($id);
         $data['asset'] = $asset;
         
+        $class               = $this->class_model->get();
+        $data['classlist']   = $class;
         $this->form_validation->set_rules('name', $this->lang->line('name'), 'trim|required|xss_clean');
         // $this->form_validation->set_rules('description', $this->lang->line('description'), 'trim|required|xss_clean');
         $this->form_validation->set_rules('purchase_date', $this->lang->line('purchase_date'), 'trim|required|xss_clean');
@@ -214,6 +219,7 @@ class Assets extends Admin_Controller
                 'depresiasi' => round($depresiasi, 2),
                 'aging' => $aging,
                 'metode' => $metode,
+                'class_id' => $this->input->post('class_id')
             );
             
             $this->assets_model->add($data);
