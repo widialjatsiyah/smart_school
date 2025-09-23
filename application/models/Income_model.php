@@ -76,7 +76,7 @@ class Income_model extends My_Model
 
     public function get($id = null)
     {
-        $this->db->select('income.id,income.date,income.name,income.invoice_no,income.amount,income.documents,income.note,income_head.income_category,income.income_head_id')->from('income');
+        $this->db->select('income.id,income.date,income.name,income.invoice_no,income.amount,income.documents,income.note,income_head.income_category,income.income_head_id,income.class_id')->from('income');
         $this->db->join('income_head', 'income.income_head_id = income_head.id');
         if ($id != null) {
             $this->db->where('income.id', $id);
@@ -98,10 +98,11 @@ class Income_model extends My_Model
     public function getincomelist()
     {
         $this->datatables
-            ->select('income.id,income.date,income.name,income.invoice_no,income.amount,income.documents,income.note,income_head.income_category,income.income_head_id')
-            ->searchable('income.name,income.invoice_no,income.date,income_head.income_category,income.amount,income.note')
-            ->orderable('income.name,income.note,income.invoice_no,income.date,income_head.income_category,income.amount')
+            ->select('income.id,income.date,income.name,income.invoice_no,income.amount,income.documents,income.note,income_head.income_category,income.income_head_id,classes.class as class, classes.id as class_id')
+            ->searchable('income.name,income.invoice_no,income.date,income_head.income_category,income.amount,income.note,classes.class')
+            ->orderable('income.name,income.note,income.invoice_no,income.date,income_head.income_category,income.amount,classes.class')
             ->join("income_head", "income.income_head_id = income_head.id")
+            ->join("classes", "income.class_id = classes.id", 'left')
             ->sort('income.id', 'desc')
             ->from('income');
         return $this->datatables->generate('json');

@@ -21,7 +21,7 @@ class Income extends Admin_Controller
         if (!$this->rbac->hasPrivilege('income', 'can_view')) {
             access_denied();
         }
-        
+
         $this->session->set_userdata('top_menu', 'Income');
         $this->session->set_userdata('sub_menu', 'income/index');
         $this->form_validation->set_rules('inc_head_id', $this->lang->line('income_head'), 'trim|required|xss_clean');
@@ -40,6 +40,7 @@ class Income extends Admin_Controller
                 'amount'      => convertCurrencyFormatToBaseAmount($this->input->post('amount')),
                 'invoice_no'  => $this->input->post('invoice_no'),
                 'note'        => $this->input->post('description'),
+                'class_id'   => $this->input->post('class_id'),
                 'documents'   => $img_name,
             );
             $insert_id = $this->income_model->add($data);
@@ -52,6 +53,8 @@ class Income extends Admin_Controller
         $data['incomelist']  = $income_result;
         $incomeHead          = $this->incomehead_model->get();
         $data['incheadlist'] = $incomeHead;
+        $class               = $this->class_model->get();
+        $data['classlist']   = $class;
         $this->load->view('layout/header', $data);
         $this->load->view('admin/income/incomeList', $data);
         $this->load->view('layout/footer', $data);
@@ -59,7 +62,7 @@ class Income extends Admin_Controller
 
     public function download($id)
     {
-        $income = $this->income_model->get($id);     
+        $income = $this->income_model->get($id);
         $this->media_storage->filedownload($income['documents'], "uploads/school_income");
     }
 
@@ -155,7 +158,7 @@ class Income extends Admin_Controller
                     $this->form_validation->set_message('handle_upload', $this->lang->line('extension_not_allowed'));
                     return false;
                 }
-				
+
                 if ($file_size > $result->file_size) {
                     $this->form_validation->set_message('handle_upload', $this->lang->line('file_size_shoud_be_less_than') . number_format($result->file_size / 1048576, 2) . " MB");
                     return false;
@@ -182,11 +185,14 @@ class Income extends Admin_Controller
         $data['title_list']  = 'Fees Master List';
         $expnseHead          = $this->incomehead_model->get();
         $data['incheadlist'] = $expnseHead;
+        $class               = $this->class_model->get();
+        $data['classlist']   = $class;
         $this->form_validation->set_rules('inc_head_id', $this->lang->line('income_head'), 'trim|required|xss_clean');
         $this->form_validation->set_rules('amount', $this->lang->line('amount'), 'trim|required|xss_clean');
         $this->form_validation->set_rules('name', $this->lang->line('name'), 'trim|required|xss_clean');
         $this->form_validation->set_rules('date', $this->lang->line('date'), 'trim|required|xss_clean');
         $this->form_validation->set_rules('documents', $this->lang->line('documents'), 'callback_handle_upload');
+        $this->form_validation->set_rules('class_id', $this->lang->line('class'), 'trim|required|xss_clean');
         if ($this->form_validation->run() == false) {
             $this->load->view('layout/header', $data);
             $this->load->view('admin/income/incomeEdit', $data);
@@ -200,6 +206,7 @@ class Income extends Admin_Controller
                 'amount'      => convertCurrencyFormatToBaseAmount($this->input->post('amount')),
                 'invoice_no'  => $this->input->post('invoice_no'),
                 'note'        => $this->input->post('description'),
+                'class_id'   => $this->input->post('class_id'),
             );
 
             if (isset($_FILES["documents"]) && $_FILES['documents']['name'] != '' && (!empty($_FILES['documents']['name']))) {
@@ -216,7 +223,7 @@ class Income extends Admin_Controller
                 }
             }
 
-            $this->income_model->add($data); 
+            $this->income_model->add($data);
 
             $this->session->set_flashdata('msg', '<div class="alert alert-success text-left">' . $this->lang->line('success_message') . '</div>');
             redirect('admin/income/index');
@@ -259,12 +266,12 @@ class Income extends Admin_Controller
                 if ($this->rbac->hasPrivilege('income', 'can_edit')) {
                     $editbtn = "<a href='" . base_url() . "admin/income/edit/" . $value->id . "'   class='btn btn-default btn-xs'  data-toggle='tooltip' title='" . $this->lang->line('edit') . "'><i class='fa fa-pencil'></i></a>";
                 }
-				
+
                 if ($this->rbac->hasPrivilege('income', 'can_delete')) {
                     $deletebtn = '';
                     $deletebtn = "<a onclick='return confirm(" . '"' . $this->lang->line('delete_confirm') . '"' . "  )' href='" . base_url() . "admin/income/delete/" . $value->id . "' class='btn btn-default btn-xs' title='" . $this->lang->line('delete') . "' data-toggle='tooltip'><i class='fa fa-trash'></i></a>";
-                } 
-                
+                }
+
                 $row   = array();
                 $row[] = $title;
 
@@ -274,7 +281,7 @@ class Income extends Admin_Controller
                     $row[] = $value->note;
                 }
 
-                $row[]     = $value->invoice_no;
+                $row[]     = ' [ ' . $value->class . ' ] '. $value->invoice_no;
                 $row[]     = $this->customlib->dateformat($value->date);
                 $row[]     = $value->income_category;
                 $row[]     = $currency_symbol . amountFormat($value->amount);
@@ -301,7 +308,7 @@ class Income extends Admin_Controller
         } elseif ($button_type == "search_full") {
             $this->form_validation->set_rules('search_text', $this->lang->line('keyword'), 'required|trim|xss_clean');
         }
-        
+
         if ($this->form_validation->run() == false) {
             $error = array();
             if ($button_type == "search_filter") {
@@ -355,7 +362,6 @@ class Income extends Admin_Controller
             $date_from         = date('Y-m-d', $this->customlib->dateYYYYMMDDtoStrtotime($date_from));
             $date_to           = date('Y-m-d', $this->customlib->dateYYYYMMDDtoStrtotime($date_to));
             $resultList        = $this->income_model->search("", $date_from, $date_to);
-
         } else {
             $search_text = $this->input->post('search_text');
             $resultList  = $this->income_model->search($search_text, "", "");
@@ -393,7 +399,5 @@ class Income extends Admin_Controller
             "data"            => $dt_data,
         );
         echo json_encode($json_data);
-
     }
-
 }
