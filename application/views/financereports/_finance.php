@@ -76,6 +76,8 @@
 
                     <li class="col-lg-4 col-md-4 col-sm-6 <?php echo set_SubSubmenu('Reports/finance/profitlossreport'); ?>"><a href="<?php echo base_url(); ?>financereports/profitlossreport"><i class="fa fa-file-text-o"></i> Laporan Laba Rugi </a></li>
 
+                    <li class="col-lg-4 col-md-4 col-sm-6 <?php echo set_SubSubmenu('Reports/finance/profitlossreportbyclass'); ?>"><a href="<?php echo base_url(); ?>financereports/profitlossreportbyclass"><i class="fa fa-file-text-o"></i> Laporan Laba Rugi Kelas </a></li>
+
                 </ul>
             </div>
         </div>

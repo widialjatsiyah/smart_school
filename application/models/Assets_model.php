@@ -203,4 +203,28 @@ class Assets_model extends MY_Model
             return $assets;
         }
     }
+
+    /**
+     * Get assets with accumulated depreciation filtered by class
+     * @param $class_id Class ID to filter by
+     * @return array Assets with accumulated depreciation
+     */
+    public function get_with_accumulated_depreciation_by_class($class_id)
+    {
+        $this->db->select('assets.*, classes.class AS class');
+        $this->db->from('assets');
+        $this->db->join('classes', 'classes.id = assets.class_id', 'left');
+        $this->db->where('assets.class_id', $class_id);
+        $query = $this->db->get();
+        $assets = $query->result_array();
+        
+        if (!empty($assets)) {
+            foreach ($assets as &$asset) {
+                $asset['accumulated_depreciation'] = $this->calculate_accumulated_depreciation($asset);
+                $asset['current_book_value'] = $asset['price'] - $asset['accumulated_depreciation'];
+            }
+        }
+        
+        return $assets;
+    }
 }

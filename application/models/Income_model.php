@@ -233,12 +233,17 @@ class Income_model extends My_Model
         return $query->result_array();
     }
 
-    public function searchByType($start_date, $end_date) {
+    public function searchByType($start_date, $end_date, $class_id = null) {
         $this->db->select('income.*,income_head.income_category');
         $this->db->from('income');
         $this->db->join('income_head', 'income_head.id = income.income_head_id');
         $this->db->where('income.date >=', $start_date);
         $this->db->where('income.date <=', $end_date);
+        
+        if ($class_id != null) {
+            $this->db->where('income.class_id', $class_id);
+        }
+        
         $this->db->order_by('income.date', 'ASC');
         $query = $this->db->get();
         return $query->result_array();

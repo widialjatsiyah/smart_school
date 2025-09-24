@@ -1529,14 +1529,19 @@ class Financereports extends Admin_Controller
         }
     }
     
-    private function getDepreciationData($start_date, $end_date) {
+    private function getDepreciationData($start_date, $end_date, $class_id = null) {
         try {
             // Load the Assets_model if not already loaded
             if (!isset($this->Assets_model)) {
                 $this->load->model('Assets_model');
             }
             
-            $assets = $this->Assets_model->get_with_accumulated_depreciation();
+            // Get assets with filtering by class_id if provided
+            if ($class_id != null) {
+                $assets = $this->Assets_model->get_with_accumulated_depreciation_by_class($class_id);
+            } else {
+                $assets = $this->Assets_model->get_with_accumulated_depreciation();
+            }
             
             $result = array();
             if (!empty($assets)) {
@@ -1566,34 +1571,27 @@ class Financereports extends Admin_Controller
                                 // End calculation at the earlier of asset fully depreciated or period end
                                 $calc_end = $period_end;
                                 
-                                // Calculate months between calc_start and calc_end
+                                // Calculate the difference in months
                                 $interval = $calc_start->diff($calc_end);
                                 $months_in_period = ($interval->y * 12) + $interval->m;
                                 
-                                // If there are days in the interval, count as additional month
+                                // Add one month if there are days in the interval
                                 if ($interval->d > 0) {
                                     $months_in_period += 1;
                                 }
                                 
-                                // Calculate depreciation for the period
-                                $period_depreciation = $monthly_depreciation * $months_in_period;
+                                // Calculate depreciation amount for the period
+                                $depreciation_amount = $monthly_depreciation * $months_in_period;
                                 
-                                // Ensure depreciation doesn't exceed remaining book value
-                                $max_depreciation = $asset['price'] - $asset['residu'];
-                                if ($period_depreciation > $max_depreciation) {
-                                    $period_depreciation = $max_depreciation;
-                                }
-                                
-                                // Ensure we don't return negative values
-                                if ($period_depreciation < 0) {
-                                    $period_depreciation = 0;
-                                }
-                                
-                                if ($period_depreciation > 0) {
+                                // Only add to result if there's a depreciation amount
+                                if ($depreciation_amount > 0) {
                                     $result[] = array(
-                                        'name' => isset($asset['name']) ? $asset['name'] : 'Unknown Asset',
-                                        'amount' => round($period_depreciation, 2),
-                                        'date' => $purchase_date
+                                        'asset_id' => isset($asset['id']) ? $asset['id'] : '',
+                                        'asset_name' => isset($asset['name']) ? $asset['name'] : '',
+                                        'purchase_date' => $purchase_date,
+                                        'amount' => $depreciation_amount,
+                                        'class_id' => isset($asset['class_id']) ? $asset['class_id'] : null,
+                                        'class' => isset($asset['class']) ? $asset['class'] : ''
                                     );
                                 }
                             }
@@ -1687,5 +1685,199 @@ class Financereports extends Admin_Controller
             // Return empty array if there's an error
             return array();
         }
+    }
+
+     public function profitlossreportbyclass()
+    {
+        if (!$this->rbac->hasPrivilege('profit_loss_report_by_class', 'can_view')) {
+            access_denied();
+        }
+
+        // Load required models
+        $this->load->model('income_model');
+        $this->load->model('expense_model');
+        $this->load->model('studentfeemaster_model');
+        $this->load->model('Payroll_model');
+        $this->load->model('Assets_model');
+        
+        // Check if onlinestudent_model exists and load it
+        $online_admission_model_exists = file_exists(APPPATH . 'models/Onlinestudent_model.php');
+        if ($online_admission_model_exists) {
+            $this->load->model('Onlinestudent_model');
+        }
+
+        $this->session->set_userdata('top_menu', 'Reports');
+        $this->session->set_userdata('sub_menu', 'Reports/finance');
+        $this->session->set_userdata('subsub_menu', 'Reports/finance/profitlossreport');
+
+        $data['searchlist'] = $this->customlib->get_searchtype();
+        $class_id = null;
+
+        if (isset($_POST['search_type']) && $_POST['search_type'] != '') {
+            $dates = $this->customlib->get_betweendate($_POST['search_type']);
+            $data['search_type'] = $_POST['search_type'];
+        } else {
+            $dates = $this->customlib->get_betweendate('this_year');
+            $data['search_type'] = '';
+        }
+
+        if (isset($_POST['class_id']) && $_POST['class_id'] != '') {
+            $class_id = $_POST['class_id'];
+            $data['class_id'] = $class_id;
+        } else {
+            $data['class_id'] = '';
+        }
+
+        $start_date = date('Y-m-d', strtotime($dates['from_date']));
+        $end_date = date('Y-m-d', strtotime($dates['to_date']));
+
+        $data['label'] = date($this->customlib->getSchoolDateFormat(), strtotime($start_date)) . " " . $this->lang->line('to') . " " . date($this->customlib->getSchoolDateFormat(), strtotime($end_date));
+
+        // Initialize data arrays
+        $data['income_result'] = array();
+        $data['expense_result'] = array();
+        $data['online_admission_fees'] = array();
+        $data['fee_billing'] = array();
+        $data['payroll_result'] = array();
+        $data['depreciation_result'] = array();
+        $data['inventory_result'] = array();
+        $data['bookinventory_result'] = array();
+        
+        // Initialize total variables
+        $total_fee_billing = 0;
+        $total_online_admission = 0;
+        $total_inventory = 0;
+        $total_bookinventory = 0;
+        
+        // Only fetch data if class_id is selected
+        if ($class_id != null && $class_id != '') {
+            // Get income data
+            $data['income_result'] = $this->income_model->searchByType($start_date, $end_date, $class_id);
+
+            // Get expense data
+            $data['expense_result'] = $this->expense_model->searchByType($start_date, $end_date, $class_id);
+            
+            // Get online admission fees collection data (if model exists)
+            $total_online_admission = 0;
+            if ($online_admission_model_exists) {
+                // Check if method exists before calling it
+                if (method_exists($this->onlinestudent_model, 'getOnlineAdmissionFeeCollectionReport')) {
+                    // Get total from online admission report
+                    $online_admission_report = $this->onlinestudent_model->getOnlineAdmissionFeeCollectionReport($start_date, $end_date);
+                    if (!empty($online_admission_report)) {
+                        foreach ($online_admission_report as $fee) {
+                            $total_online_admission += isset($fee->amount) ? $fee->amount : 0;
+                        }
+                    }
+                }
+            }
+            
+            // Get fee billing data (outstanding fees)
+            $total_fee_billing = 0;
+            if (method_exists($this->studentfeemaster_model, 'getFeeCollectionReport')) {
+                // Get total from collection report instead of billing report
+                $collection_report = $this->studentfeemaster_model->getFeeCollectionReport($start_date, $end_date, null, null, null, $class_id, null);
+                if (!empty($collection_report)) {
+                    foreach ($collection_report as $collection) {
+                        $total_fee_billing += isset($collection['amount']) ? $collection['amount'] : 0;
+                    }
+                }
+            }
+            
+            // Get payroll data
+            $data['payroll_result'] = $this->getPayrollData($start_date, $end_date, $class_id);
+            
+            // Get depreciation data
+            $data['depreciation_result'] = $this->getDepreciationData($start_date, $end_date, $class_id);
+            
+            // Get inventory purchase data
+            $data['inventory_result'] = $this->getInventoryData($start_date, $end_date, $class_id);
+            
+            // Get book inventory data
+            $data['bookinventory_result'] = $this->getBookInventoryData($start_date, $end_date, $class_id);
+        }
+        
+        // Get currency symbol
+        $data['currency_symbol'] = $this->customlib->getSchoolCurrencyFormat();
+
+        // Calculate totals
+        $total_income = 0;
+        $total_expense = 0;
+
+        // Group income by head and calculate total
+        $income_by_head = array();
+        if (!empty($data['income_result'])) {
+            foreach ($data['income_result'] as $income) {
+                $head = isset($income['income_category']) ? $income['income_category'] : 'Unknown';
+                $amount = isset($income['amount']) ? $income['amount'] : 0;
+                
+                if (!isset($income_by_head[$head])) {
+                    $income_by_head[$head] = 0;
+                }
+                $income_by_head[$head] += $amount;
+                $total_income += $amount;
+            }
+        }
+
+        if (!empty($data['expense_result'])) {
+            foreach ($data['expense_result'] as $expense) {
+                $total_expense += isset($expense['amount']) ? $expense['amount'] : 0;
+            }
+        }
+        
+        // Add online admission fees to income
+        // Add online admission fees to income
+        if (!empty($data['online_admission_fees'])) {
+            foreach ($data['online_admission_fees'] as $fee) {
+                $total_income += isset($fee->amount) ? $fee->amount : 0;
+            }
+        }
+        
+        // Add fee billing to income (as receivable)
+        $total_income += $total_fee_billing;
+        
+        // Add payroll to expense
+        if (!empty($data['payroll_result'])) {
+            foreach ($data['payroll_result'] as $payroll) {
+                $total_expense += isset($payroll['net_salary']) ? $payroll['net_salary'] : 0;
+            }
+        }
+        
+        // Add depreciation to expense
+        if (!empty($data['depreciation_result'])) {
+            foreach ($data['depreciation_result'] as $depreciation) {
+                $total_expense += isset($depreciation['amount']) ? $depreciation['amount'] : 0;
+            }
+        }
+        
+        // Add book inventory to expense
+        $total_bookinventory = 0;
+        if (!empty($data['bookinventory_result'])) {
+            foreach ($data['bookinventory_result'] as $bookinventory) {
+                $total_bookinventory += isset($bookinventory['amount']) ? $bookinventory['amount'] : 0;
+            }
+        }
+        $total_expense += $total_bookinventory;
+        
+        // Add inventory to expense
+        $total_inventory = 0;
+        if (!empty($data['inventory_result'])) {
+            foreach ($data['inventory_result'] as $inventory) {
+                $total_inventory += isset($inventory['amount']) ? $inventory['amount'] : 0;
+            }
+        }
+        $total_expense += $total_inventory;
+        $data['classlist'] = $this->class_model->get();
+        $data['total_income'] = $total_income;
+        $data['total_expense'] = $total_expense;
+        $data['profit_loss'] = $total_income - $total_expense;
+        $data['total_fee_billing'] = $total_fee_billing;
+        $data['total_inventory'] = $total_inventory;
+        $data['total_bookinventory'] = $total_bookinventory;
+        $data['income_totals'] = $income_by_head;
+
+        $this->load->view('layout/header', $data);
+        $this->load->view('financereports/profitlossreportbyclass', $data);
+        $this->load->view('layout/footer', $data);
     }
 }

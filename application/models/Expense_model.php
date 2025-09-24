@@ -200,12 +200,17 @@ class Expense_model extends MY_Model
         return $r;
     }
 
-    public function searchByType($start_date, $end_date) {
+    public function searchByType($start_date, $end_date, $class_id = null) {
         $this->db->select('expenses.*,expense_head.exp_category');
         $this->db->from('expenses');
         $this->db->join('expense_head', 'expense_head.id = expenses.exp_head_id');
         $this->db->where('expenses.date >=', $start_date);
         $this->db->where('expenses.date <=', $end_date);
+        
+        if ($class_id != null) {
+            $this->db->where('expenses.class_id', $class_id);
+        }
+        
         $this->db->order_by('expenses.date', 'ASC');
         $query = $this->db->get();
         return $query->result_array();
