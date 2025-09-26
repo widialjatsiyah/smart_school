@@ -26,20 +26,19 @@ class Itemstock extends Admin_Controller
 
         $this->form_validation->set_rules('item_id', $this->lang->line('item'), 'trim|required|xss_clean');
         $this->form_validation->set_rules('date', $this->lang->line('date'), 'trim|required|xss_clean');
-        
+
         $this->form_validation->set_rules('quantity', $this->lang->line('quantity'), 'trim|required|numeric|xss_clean');
         $this->form_validation->set_rules('purchase_price', $this->lang->line('purchase_price'), 'trim|required|numeric|xss_clean');
         $this->form_validation->set_rules('item_category_id', $this->lang->line('item_category'), 'trim|required|xss_clean');
         $this->form_validation->set_rules('item_photo', $this->lang->line('file'), 'callback_handle_upload[item_photo]');
 
         if ($this->form_validation->run() == false) {
-
         } else {
 
             $img_name = $this->media_storage->fileupload("item_photo", "./uploads/inventory_items/");
 
             $store_id = ($this->input->post('store_id')) ? $this->input->post('store_id') : null;
-            
+
             $data     = array(
                 'item_id'        => $this->input->post('item_id'),
                 'symbol'         => $this->input->post('symbol'),
@@ -50,8 +49,9 @@ class Itemstock extends Admin_Controller
                 'date'           => date('Y-m-d', $this->customlib->datetostrtotime($this->input->post('date'))),
                 'description'    => $this->input->post('description'),
                 'attachment'     => $img_name,
+                'class_id'    => $this->input->post('class_id'),
             );
-            $insert_id = $this->itemstock_model->add($data);         
+            $insert_id = $this->itemstock_model->add($data);
 
             $this->session->set_flashdata('msg', '<div class="alert alert-success text-left">' . $this->lang->line('success_message') . '</div>');
             redirect('admin/itemstock/index');
@@ -65,6 +65,8 @@ class Itemstock extends Admin_Controller
         $data['itemsupplier'] = $itemsupplier;
         $itemstore            = $this->itemstore_model->get();
         $data['itemstore']    = $itemstore;
+        $class               = $this->class_model->get();
+        $data['classlist']   = $class;
         $this->load->view('layout/header', $data);
         $this->load->view('admin/itemstock/itemList', $data);
         $this->load->view('layout/footer', $data);
@@ -74,7 +76,6 @@ class Itemstock extends Admin_Controller
     {
         $itemlist = $this->itemstock_model->get($id);
         $this->media_storage->filedownload($itemlist['attachment'], "./uploads/inventory_items");
-
     }
 
     public function getItemByCategory()
@@ -95,7 +96,7 @@ class Itemstock extends Admin_Controller
     {
         if (!$this->rbac->hasPrivilege('item_stock', 'can_delete')) {
             access_denied();
-        } 
+        }
         $row = $this->itemstock_model->get($id);
         if ($row['attachment'] != '') {
             $this->media_storage->filedelete($row['attachment'], "uploads/inventory_items/");
@@ -134,7 +135,6 @@ class Itemstock extends Admin_Controller
                     $this->form_validation->set_message('handle_upload', $this->lang->line('file_size_shoud_be_less_than') . number_format($result->file_size / 1048576, 2) . " MB");
                     return false;
                 }
-
             } else {
                 $this->form_validation->set_message('handle_upload', $this->lang->line('file_type_extension_error_uploading_image'));
                 return false;
@@ -143,7 +143,6 @@ class Itemstock extends Admin_Controller
             return true;
         }
         return true;
-
     }
 
     public function edit($id)
@@ -165,6 +164,8 @@ class Itemstock extends Admin_Controller
         $itemstore            = $this->itemstore_model->get();
         $data['itemstore']    = $itemstore;
 
+        $class               = $this->class_model->get();
+        $data['classlist']   = $class;
         $itemunitdata      = $this->item_model->getItemunit($item['item_id']);
         $data['item_unit'] = $itemunitdata['unit'];
 
@@ -190,6 +191,7 @@ class Itemstock extends Admin_Controller
                 'purchase_price' => convertCurrencyFormatToBaseAmount($this->input->post('purchase_price')),
                 'date'           => date('Y-m-d', $this->customlib->datetostrtotime($this->input->post('date'))),
                 'description'    => $this->input->post('description'),
+                'class_id'      => $this->input->post('class_id')
             );
 
             if (isset($_FILES["item_photo"]) && $_FILES['item_photo']['name'] != '' && (!empty($_FILES['item_photo']['name']))) {
@@ -206,11 +208,10 @@ class Itemstock extends Admin_Controller
                 $this->media_storage->filedelete($item['attachment'], "uploads/inventory_items");
             }
 
-            $this->itemstock_model->add($data);         
+            $this->itemstock_model->add($data);
 
             $this->session->set_flashdata('msg', '<div class="alert alert-success text-left">' . $this->lang->line('update_message') . '</div>');
             redirect('admin/itemstock/index');
         }
     }
-
 }

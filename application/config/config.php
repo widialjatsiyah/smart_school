@@ -24,7 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
   | a PHP script and you can easily do that on your own.
   |
  */
-// $config['base_url'] = 'https://41c1ec123b30.ngrok-free.app/smart_school/';
+// $config['base_url'] = 'https://e676f5590863.ngrok-free.app/smart_school/';
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
 $config['base_url'] = $protocol . '://' . $_SERVER['HTTP_HOST'] . str_replace(basename($_SERVER['SCRIPT_NAME']), "", $_SERVER['SCRIPT_NAME']);
 

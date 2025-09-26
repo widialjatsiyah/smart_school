@@ -14,10 +14,16 @@ class Assets_model extends MY_Model
     }
 
     public function get($id = null)
-    {   
+    {
+        $class_section = $this->customlib->get_myClassSection();
+
         $this->db->select('assets.*, classes.class AS class');
         $this->db->from('assets');
         $this->db->join('classes', 'classes.id = assets.class_id', 'left');
+        if ($class_section) {
+            $class_ids = array_keys($class_section);
+            $this->db->where_in('assets.class_id', $class_ids);
+        }
         if ($id != null) {
             $this->db->where('id', $id);
             $query = $this->db->get();
@@ -124,12 +130,12 @@ class Assets_model extends MY_Model
         if (empty($asset['purchase_date']) || $asset['purchase_date'] == '0000-00-00' || $asset['purchase_date'] == '1970-01-01') {
             return 0;
         }
-        
+
         // Only calculate for straight line method (metode = 1)
         if ($asset['metode'] == 1) {
             // Annual depreciation
             $annual_depreciation = $asset['depresiasi'];
-            
+
             // If no specific months provided, calculate based on purchase date to current date
             if ($months === null) {
                 $purchase_date = new DateTime($asset['purchase_date']);
@@ -138,7 +144,6 @@ class Assets_model extends MY_Model
                 // If purchase_date is in the future, depreciation is 0
                 if ($purchase_date > $current_date) {
                     $total_months = 0;
-                    
                 } else {
                     $interval = $purchase_date->diff($current_date);
                     $total_months = ($interval->y * 12) + $interval->m;
@@ -151,27 +156,27 @@ class Assets_model extends MY_Model
             } else {
                 $total_months = $months;
             }
-           
+
             // die();
             // Monthly depreciation
             $monthly_depreciation = $annual_depreciation / 12;
             // Calculate accumulated depreciation
             $accumulated_depreciation = $monthly_depreciation * $total_months;
-            
+
             // Ensure accumulated depreciation doesn't exceed (price - residu)
             $max_depreciation = $asset['price'] - $asset['residu'];
             if ($accumulated_depreciation > $max_depreciation) {
                 $accumulated_depreciation = $max_depreciation;
             }
-            
+
             // Ensure we don't return negative values
             if ($accumulated_depreciation < 0) {
                 $accumulated_depreciation = 0;
             }
-            
+
             return round($accumulated_depreciation, 2);
         }
-        
+
         // For no depreciation method (metode = 0), accumulated depreciation is 0
         return 0;
     }
@@ -184,7 +189,7 @@ class Assets_model extends MY_Model
     public function get_with_accumulated_depreciation($id = null)
     {
         $assets = $this->get($id);
-        
+
         if ($id != null) {
             // Single asset
             if (!empty($assets)) {
@@ -217,14 +222,14 @@ class Assets_model extends MY_Model
         $this->db->where('assets.class_id', $class_id);
         $query = $this->db->get();
         $assets = $query->result_array();
-        
+
         if (!empty($assets)) {
             foreach ($assets as &$asset) {
                 $asset['accumulated_depreciation'] = $this->calculate_accumulated_depreciation($asset);
                 $asset['current_book_value'] = $asset['price'] - $asset['accumulated_depreciation'];
             }
         }
-        
+
         return $assets;
     }
 }

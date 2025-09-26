@@ -67,13 +67,22 @@ class Expense_model extends MY_Model
 
     public function getexpenselist($id = null)
     {
+        
+        $class_section = $this->customlib->get_myClassSection();
+        
         $this->datatables
             ->select('expenses.id,expenses.date,expenses.name,expenses.invoice_no,expenses.amount,expenses.documents,expenses.note,expense_head.exp_category,expenses.exp_head_id, classes.class as class')
             ->searchable('expenses.id,expenses.date,expenses.name,expenses.invoice_no,expenses.amount,expenses.documents,expenses.note,expense_head.exp_category,expenses.exp_head_id, classes.class')
             ->orderable('expenses.name,expenses.note,expenses.invoice_no,expenses.date,expense_head.exp_category,expenses.amount')
+            ->from('expenses')
             ->join("expense_head", "expenses.exp_head_id = expense_head.id")
-            ->join("classes", "expenses.class_id = classes.id")
-            ->from('expenses');
+            ->join("classes", "expenses.class_id = classes.id");
+            
+        if ($class_section) {
+            $class_ids = array_keys($class_section);
+            $this->datatables->where_in('expenses.class_id', $class_ids);
+        }
+            
         return $this->datatables->generate('json');
     }
 

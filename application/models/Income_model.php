@@ -30,7 +30,6 @@ class Income_model extends My_Model
                 ->join("income_head", "income.income_head_id = income_head.id")
                 ->like('income.name', $text)
                 ->from('income');
-
         } else {
 
             $this->datatables
@@ -97,6 +96,8 @@ class Income_model extends My_Model
      */
     public function getincomelist()
     {
+        $class_section = $this->customlib->get_myClassSection();
+
         $this->datatables
             ->select('income.id,income.date,income.name,income.invoice_no,income.amount,income.documents,income.note,income_head.income_category,income.income_head_id,classes.class as class, classes.id as class_id')
             ->searchable('income.name,income.invoice_no,income.date,income_head.income_category,income.amount,income.note,classes.class')
@@ -105,6 +106,10 @@ class Income_model extends My_Model
             ->join("classes", "income.class_id = classes.id", 'left')
             ->sort('income.id', 'desc')
             ->from('income');
+        if ($class_section) {
+            $class_ids = array_keys($class_section);
+            $this->datatables->where_in('income.class_id', $class_ids);
+        }
         return $this->datatables->generate('json');
     }
 
@@ -229,21 +234,22 @@ class Income_model extends My_Model
 		UNION 
 		SELECT income.*, 'income' AS source, income.note as note, income_head.income_category AS category FROM income JOIN income_head ON income_head.id = income.income_head_id where DATE_FORMAT(income.date, '%Y-%m-%d') >= '$start_date'
         and DATE_FORMAT(income.date, '%Y-%m-%d') <= '$end_date' ORDER BY date asc";
-        $query = $this->db->query($query);		 
+        $query = $this->db->query($query);
         return $query->result_array();
     }
 
-    public function searchByType($start_date, $end_date, $class_id = null) {
+    public function searchByType($start_date, $end_date, $class_id = null)
+    {
         $this->db->select('income.*,income_head.income_category');
         $this->db->from('income');
         $this->db->join('income_head', 'income_head.id = income.income_head_id');
         $this->db->where('income.date >=', $start_date);
         $this->db->where('income.date <=', $end_date);
-        
+
         if ($class_id != null) {
             $this->db->where('income.class_id', $class_id);
         }
-        
+
         $this->db->order_by('income.date', 'ASC');
         $query = $this->db->get();
         return $query->result_array();

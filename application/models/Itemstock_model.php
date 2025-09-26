@@ -15,11 +15,18 @@ class Itemstock_model extends MY_Model
 
     public function get($id = null)
     {
-        $this->db->select('`item_stock`.*, `item`.`name`, `item`.`item_category_id`, `item`.`description` as des, `item_category`.`item_category`, `item_supplier`.`item_supplier`, `item_store`.`item_store`, `item_store`.`code`')->from('item_stock');
+        $class_section = $this->customlib->get_myClassSection();
+
+        $this->db->select('`item_stock`.*, `item`.`name`, `item`.`item_category_id`, `item`.`description` as des, `item_category`.`item_category`, `item_supplier`.`item_supplier`, `item_store`.`item_store`, `item_store`.`code`, classes.class')->from('item_stock');
         $this->db->join('item ', 'item.id = item_stock.item_id');
         $this->db->join('item_category', 'item.item_category_id = item_category.id');
         $this->db->join('item_supplier', 'item_stock.supplier_id = item_supplier.id');
         $this->db->join('item_store', 'item_store.id = item_stock.store_id', 'left outer');
+        $this->db->join('classes', 'classes.id = item_stock.class_id', 'left');
+        if ($class_section) {
+            $class_ids = array_keys($class_section);
+            $this->db->where_in('item_stock.class_id', $class_ids);
+        }
         if ($id != null) {
             $this->db->where('item_stock.id', $id);
         } else {
@@ -96,11 +103,11 @@ class Itemstock_model extends MY_Model
             return false;
         } else {
             return $insert_id;
-        } 
+        }
     }
 
     public function get_currentstock($start_date = null, $end_date = null)
-    {       
+    {
         if ($start_date != '' && $end_date != '') {
             $this->datatables->where("date_format(item_stock.date,'%Y-%m-%d') between '" . $start_date . "' and '" . $end_date . "'");
         }
@@ -130,10 +137,10 @@ class Itemstock_model extends MY_Model
         $this->db->where("date_format(item_stock.date,'%Y-%m-%d') >=", $start_date);
         $this->db->where("date_format(item_stock.date,'%Y-%m-%d') <=", $end_date);
         $this->db->order_by('item_stock.id', 'desc');
-        
+
         $query = $this->db->get();
         $result = $query->result();
-        
+
         // Format data to match what the Datatables library would return
         $formatted_result = array(
             'draw' => 1,
@@ -141,8 +148,7 @@ class Itemstock_model extends MY_Model
             'recordsFiltered' => count($result),
             'data' => $result
         );
-        
+
         return json_encode($formatted_result);
     }
-
 }
