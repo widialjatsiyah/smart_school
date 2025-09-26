@@ -25,18 +25,23 @@ class Itemissue_model extends MY_Model
      */
     public function getitemlist()
     {
-        $sql = "select item_issue.*,item.name as `item_name`,item.item_category_id,item_category.item_category ,staff.employee_id,staff.name as staff_name,staff.surname,issueby.employee_id as issueby_employee_id,issueby.name as issueby_staff_name,issueby.surname as issueby_surname,roles.name from item_issue
-         inner join item on item.id=item_issue.item_id
-         inner join item_category on item_category.id=item.item_category_id
-         inner join staff on staff.id=item_issue.issue_to
-         inner join staff as issueby on issueby.id=item_issue.issue_by         
-         inner join staff_roles on staff_roles.staff_id =staff.id
-         inner join roles on roles.id= staff_roles.role_id ";
-        $this->datatables->query($sql)
+        $class_section = $this->customlib->get_myClassSection();
+
+        $this->datatables->select('item_issue.*, item.name as item_name, item.item_category_id, item_category.item_category, staff.employee_id, staff.name as staff_name, staff.surname, issueby.employee_id as issueby_employee_id, issueby.name as issueby_staff_name, issueby.surname as issueby_surname, roles.name, classes.class as class')
+            ->from('item_issue')
+            ->join('item', 'item.id = item_issue.item_id')
+            ->join('item_category', 'item_category.id = item.item_category_id')
+            ->join('staff', 'staff.id = item_issue.issue_to')
+            ->join('staff as issueby', 'issueby.id = item_issue.issue_by')
+            ->join('staff_roles', 'staff_roles.staff_id = staff.id')
+            ->join('classes', 'classes.id = item_issue.class_id')
+            ->join('roles', 'roles.id = staff_roles.role_id')
             ->orderable('item.id,item.name,item_category,issue_date,staff.name,issue_by,quantity,null')
-            ->searchable('item.id,item.name,item_category,issue_date,staff.name,issue_by,item_issue.quantity,null')
-            ->sort('item_issue.id','desc')
-            ->query_where_enable(true);
+            ->searchable('item.id,item.name,item_category,issue_date,staff.name,issue_by,item_issue.quantity,null');
+        if ($class_section) {
+            $class_ids = array_keys($class_section);
+            $this->datatables->where_in('item_issue.class_id', $class_ids);
+        }
         return $this->datatables->generate('json');
     }
 
@@ -134,5 +139,4 @@ class Itemissue_model extends MY_Model
             ->query_where_enable(true);
         return $this->datatables->generate('json');
     }
-
 }

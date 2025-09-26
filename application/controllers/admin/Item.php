@@ -89,6 +89,20 @@ class Item extends Admin_Controller
         }
     }
 
+    
+    public function getAvailQuantityClass()
+    {
+        $item_id = $this->input->get('item_id');
+        $data    = $this->item_model->getItemAvailableClass($item_id);
+
+        $available = ($data['added_stock'] - $data['issued']);
+        if ($available >= 0) {
+            echo json_encode(array('available' => $available));
+        } else {
+            echo json_encode(array('available' => 0));
+        }
+    }
+
     public function handle_upload()
     {
         if (isset($_FILES["file"]) && !empty($_FILES['file']['name'])) {

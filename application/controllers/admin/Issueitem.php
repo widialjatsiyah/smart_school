@@ -38,6 +38,9 @@ class Issueitem extends Admin_Controller
         $itemcategory        = $this->itemcategory_model->get();
         $data['itemcatlist'] = $itemcategory;
         $data['staff']       = $this->staff_model->inventry_staff();
+        
+        $class               = $this->class_model->get();
+        $data['classlist']   = $class;
         $this->load->view('layout/header', $data);
         $this->load->view('admin/issueitem/issueitemCreate', $data);
         $this->load->view('layout/footer', $data);
@@ -81,6 +84,7 @@ class Issueitem extends Admin_Controller
                 'issue_type'       => $this->input->post('account_type'),
                 'item_category_id' => $this->input->post('item_category_id'),
                 'item_id'          => $this->input->post('item_id'),
+                'class_id'        => $this->input->post('class_id'),
             );
             $this->itemissue_model->add($data);
             $array = array('status' => 'success', 'error' => '', 'message' => $this->lang->line('success_message'));
@@ -170,6 +174,7 @@ class Issueitem extends Admin_Controller
                 }
 
                 $row   = array();
+                $row[] = $value->class ;
                 $row[] = $value->item_name ;
                 $row[] = $value->note;
                 $row[] = $value->item_category;

@@ -27,6 +27,7 @@
                                  <table class="table table-striped table-bordered table-hover item-list" data-export-title="<?php echo $this->lang->line('issue_item_list'); ?>">
                                 <thead>
                                     <tr>
+                                        <th><?php echo $this->lang->line('class'); ?></th>
                                         <th><?php echo $this->lang->line('item'); ?></th>
                                         <th width="20%"><?php echo $this->lang->line('note'); ?></th>
                                         <th><?php echo $this->lang->line('item_category'); ?></th>
