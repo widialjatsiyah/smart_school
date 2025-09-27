@@ -20,26 +20,42 @@ class Income_model extends My_Model
      * @return mixed
      */
 
-    public function search($text = null, $start_date = null, $end_date = null)
+    public function search($text = null, $start_date = null, $end_date = null, $class_id = null)
     {
+        
+        $class_section = $this->customlib->get_myClassSection();
+
         if (!empty($text)) {
             $this->datatables
-                ->select('income.id,income.date,income.name,income.invoice_no,income.amount,income.documents,income.note,income_head.income_category,income.income_head_id')
+                ->select('income.id,income.date,income.name,income.invoice_no,income.amount,income.documents,income.note,income_head.income_category,income.income_head_id, classes.class as class')
                 ->searchable('income.name,income.invoice_no,income.date,income_head.income_category,income.amount')
                 ->orderable('income.name,income.invoice_no,income.date,income_head.income_category,income.amount')
                 ->join("income_head", "income.income_head_id = income_head.id")
+                ->join("classes", "income.class_id = classes.id", 'left')
                 ->like('income.name', $text)
                 ->from('income');
+                      
+            if ($class_section) {
+                $class_ids = array_keys($class_section);
+                $this->datatables->where_in('income.class_id', $class_ids);
+            }
         } else {
 
             $this->datatables
-                ->select('income.id,income.date,income.name,income.invoice_no,income.amount,income.documents,income.note,income_head.income_category,income.income_head_id')
+                ->select('income.id,income.date,income.name,income.invoice_no,income.amount,income.documents,income.note,income_head.income_category,income.income_head_id,classes.class as class')
                 ->searchable('income.name,income.invoice_no,income.date,income_head.income_category,income.amount')
                 ->orderable('income.name,income.invoice_no,income.date,income_head.income_category,income.amount')
                 ->join("income_head", "income.income_head_id = income_head.id")
+                ->join("classes", "income.class_id = classes.id", 'left')
                 ->where('income.date <=', $end_date)
                 ->where('income.date >=', $start_date)
                 ->from('income');
+             if ($class_id != null) {
+                $this->datatables->where('income.class_id', $class_id);
+            } else  if ($class_section) {
+                $class_ids = array_keys($class_section);
+                $this->datatables->where_in('income.class_id', $class_ids);
+            }
         }
 
         return $this->datatables->generate('json');

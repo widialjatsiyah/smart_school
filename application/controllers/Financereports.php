@@ -550,7 +550,7 @@ class Financereports extends Admin_Controller
         } elseif (isset($_POST['search']) && $_POST['search'] == $this->lang->line('search')) {
             $search_type = 'period';
         }
-        
+
         if ($search_type != '') {
             if ($search_type == 'period') {
                 if (isset($_POST['date_from']) && isset($_POST['date_to'])) {
@@ -815,6 +815,9 @@ class Financereports extends Admin_Controller
         $this->session->set_userdata('sub_menu', 'Reports/finance');
         $this->session->set_userdata('subsub_menu', 'Reports/finance/income');
         $data['searchlist'] = $this->customlib->get_searchtype();
+        
+        $class               = $this->class_model->get();
+        $data['classlist']   = $class;
         $this->load->view('layout/header', $data);
         $this->load->view('financereports/income', $data);
         $this->load->view('layout/footer', $data);
@@ -823,11 +826,13 @@ class Financereports extends Admin_Controller
     public function searchreportvalidation()
     {
         $this->form_validation->set_rules('search_type', $this->lang->line('search_type'), 'trim|required|xss_clean');
+        $this->form_validation->set_rules('class_id', $this->lang->line('class'), 'trim|required|xss_clean');
 
         if ($this->form_validation->run() == false) {
             $error = array();
 
             $error['search_type'] = form_error('search_type');
+            $error['class_id']    = form_error('class_id');
 
             $array = array('status' => 0, 'error' => $error);
             echo json_encode($array);
@@ -877,6 +882,7 @@ class Financereports extends Admin_Controller
                 $grand_total += $value->amount;
 
                 $row   = array();
+                $row[] = $value->class;
                 $row[] = $value->name;
                 $row[] = $value->invoice_no;
                 $row[] = $value->income_category;
@@ -885,6 +891,7 @@ class Financereports extends Admin_Controller
                 $dt_data[] = $row;
             }
             $footer_row   = array();
+            $footer_row[] = "";
             $footer_row[] = "";
             $footer_row[] = "";
             $footer_row[] = "";
@@ -911,6 +918,8 @@ class Financereports extends Admin_Controller
         $data['date_type']   = $this->customlib->date_type();
         $data['date_typeid'] = '';
 
+        $class               = $this->class_model->get();
+        $data['classlist']   = $class;
         $this->form_validation->set_rules('search_type', $this->lang->line('search_type'), 'trim|required|xss_clean');
 
         if ($this->form_validation->run() == false) {
@@ -959,6 +968,7 @@ class Financereports extends Admin_Controller
                 $grand_total += $value->amount;
 
                 $row       = array();
+                $row[]     = $value->class;
                 $row[]     = date($this->customlib->getSchoolDateFormat(), $this->customlib->dateyyyymmddTodateformat($value->date));
                 $row[]     = $value->exp_category;
                 $row[]     = $value->name;
@@ -966,6 +976,7 @@ class Financereports extends Admin_Controller
                 $row[]     = $currency_symbol . amountFormat($value->amount);
                 $dt_data[] = $row;
             }
+            $footer_row[] = "";
             $footer_row[] = "";
             $footer_row[] = "";
             $footer_row[] = "";
@@ -1340,7 +1351,7 @@ class Financereports extends Admin_Controller
         $this->load->model('studentfeemaster_model');
         $this->load->model('Payroll_model');
         $this->load->model('Assets_model');
-        
+
         // Check if onlinestudent_model exists and load it
         $online_admission_model_exists = file_exists(APPPATH . 'models/Onlinestudent_model.php');
         if ($online_admission_model_exists) {
@@ -1371,7 +1382,7 @@ class Financereports extends Admin_Controller
 
         // Get expense data
         $data['expense_result'] = $this->expense_model->searchByType($start_date, $end_date);
-        
+
         // Get online admission fees collection data (if model exists)
         $data['online_admission_fees'] = array();
         $total_online_admission = 0;
@@ -1387,7 +1398,7 @@ class Financereports extends Admin_Controller
                 }
             }
         }
-        
+
         // Get fee billing data (outstanding fees)
         $data['fee_billing'] = array();
         $total_fee_billing = 0;
@@ -1400,19 +1411,19 @@ class Financereports extends Admin_Controller
                 }
             }
         }
-        
+
         // Get payroll data
         $data['payroll_result'] = $this->getPayrollData($start_date, $end_date);
-        
+
         // Get depreciation data
         $data['depreciation_result'] = $this->getDepreciationData($start_date, $end_date);
-        
+
         // Get inventory purchase data
         $data['inventory_result'] = $this->getInventoryData($start_date, $end_date);
-        
+
         // Get book inventory data
         $data['bookinventory_result'] = $this->getBookInventoryData($start_date, $end_date);
-        
+
         // Get currency symbol
         $data['currency_symbol'] = $this->customlib->getSchoolCurrencyFormat();
 
@@ -1426,7 +1437,7 @@ class Financereports extends Admin_Controller
             foreach ($data['income_result'] as $income) {
                 $head = isset($income['income_category']) ? $income['income_category'] : 'Unknown';
                 $amount = isset($income['amount']) ? $income['amount'] : 0;
-                
+
                 if (!isset($income_by_head[$head])) {
                     $income_by_head[$head] = 0;
                 }
@@ -1440,7 +1451,7 @@ class Financereports extends Admin_Controller
                 $total_expense += isset($expense['amount']) ? $expense['amount'] : 0;
             }
         }
-        
+
         // Add online admission fees to income
         // Add online admission fees to income
         if (!empty($data['online_admission_fees'])) {
@@ -1448,24 +1459,24 @@ class Financereports extends Admin_Controller
                 $total_income += isset($fee->amount) ? $fee->amount : 0;
             }
         }
-        
+
         // Add fee billing to income (as receivable)
         $total_income += $total_fee_billing;
-        
+
         // Add payroll to expense
         if (!empty($data['payroll_result'])) {
             foreach ($data['payroll_result'] as $payroll) {
                 $total_expense += isset($payroll['net_salary']) ? $payroll['net_salary'] : 0;
             }
         }
-        
+
         // Add depreciation to expense
         if (!empty($data['depreciation_result'])) {
             foreach ($data['depreciation_result'] as $depreciation) {
                 $total_expense += isset($depreciation['amount']) ? $depreciation['amount'] : 0;
             }
         }
-        
+
         // Add book inventory to expense
         $total_bookinventory = 0;
         if (!empty($data['bookinventory_result'])) {
@@ -1474,7 +1485,7 @@ class Financereports extends Admin_Controller
             }
         }
         $total_expense += $total_bookinventory;
-        
+
         // Add inventory to expense
         $total_inventory = 0;
         if (!empty($data['inventory_result'])) {
@@ -1496,18 +1507,19 @@ class Financereports extends Admin_Controller
         $this->load->view('financereports/profitlossreport', $data);
         $this->load->view('layout/footer', $data);
     }
-    
-    private function getPayrollData($start_date, $end_date) {
+
+    private function getPayrollData($start_date, $end_date)
+    {
         try {
             // Load the Payroll_model if not already loaded
             if (!isset($this->Payroll_model)) {
                 $this->load->model('Payroll_model');
             }
-            
+
             // We'll get all payroll data for the year since month is not specified in search
             $year = date('Y', strtotime($start_date));
             $result = $this->Payroll_model->getpayrollReport('', $year, 'select');
-            
+
             // Filter by date range
             $filtered_result = array();
             if (!empty($result)) {
@@ -1521,28 +1533,29 @@ class Financereports extends Admin_Controller
                     }
                 }
             }
-            
+
             return $filtered_result;
         } catch (Exception $e) {
             // Return empty array if there's an error
             return array();
         }
     }
-    
-    private function getDepreciationData($start_date, $end_date, $class_id = null) {
+
+    private function getDepreciationData($start_date, $end_date, $class_id = null)
+    {
         try {
             // Load the Assets_model if not already loaded
             if (!isset($this->Assets_model)) {
                 $this->load->model('Assets_model');
             }
-            
+
             // Get assets with filtering by class_id if provided
             if ($class_id != null) {
                 $assets = $this->Assets_model->get_with_accumulated_depreciation_by_class($class_id);
             } else {
                 $assets = $this->Assets_model->get_with_accumulated_depreciation();
             }
-            
+
             $result = array();
             if (!empty($assets)) {
                 // For a single asset, we calculate depreciation for the period
@@ -1555,34 +1568,34 @@ class Financereports extends Admin_Controller
                             $period_start = new DateTime($start_date);
                             $period_end = new DateTime($end_date);
                             $asset_purchase = new DateTime($purchase_date);
-                            
+
                             // Only calculate if asset was purchased before the end of the period
                             if ($asset_purchase <= $period_end) {
                                 // Calculate monthly depreciation
                                 $annual_depreciation = isset($asset['depresiasi']) ? $asset['depresiasi'] : 0;
                                 $monthly_depreciation = $annual_depreciation / 12;
-                                
+
                                 // Calculate number of months in the period
                                 $months_in_period = 0;
-                                
+
                                 // Start calculation from the later of asset purchase date or period start
                                 $calc_start = ($asset_purchase > $period_start) ? $asset_purchase : $period_start;
-                                
+
                                 // End calculation at the earlier of asset fully depreciated or period end
                                 $calc_end = $period_end;
-                                
+
                                 // Calculate the difference in months
                                 $interval = $calc_start->diff($calc_end);
                                 $months_in_period = ($interval->y * 12) + $interval->m;
-                                
+
                                 // Add one month if there are days in the interval
                                 if ($interval->d > 0) {
                                     $months_in_period += 1;
                                 }
-                                
+
                                 // Calculate depreciation amount for the period
                                 $depreciation_amount = $monthly_depreciation * $months_in_period;
-                                
+
                                 // Only add to result if there's a depreciation amount
                                 if ($depreciation_amount > 0) {
                                     $result[] = array(
@@ -1599,27 +1612,28 @@ class Financereports extends Admin_Controller
                     }
                 }
             }
-            
+
             return $result;
         } catch (Exception $e) {
             // Return empty array if there's an error
             return array();
         }
     }
-    
-    private function getInventoryData($start_date, $end_date, $class_id = null) {
+
+    private function getInventoryData($start_date, $end_date, $class_id = null)
+    {
         try {
             // Load the Itemstock_model if not already loaded
             if (!isset($this->itemstock_model)) {
                 $this->load->model('itemstock_model');
             }
-            
+
             // Get inventory purchase data within date range
             $itemresult = $this->itemstock_model->get_ItemByBetweenDate($start_date, $end_date, $class_id);
-            
+
             // Parse the JSON result
             $resultlist = json_decode($itemresult);
-            
+
             // Process data to match expected format
             $inventory_data = array();
             // Check if resultlist is not null and has data property
@@ -1629,11 +1643,11 @@ class Financereports extends Admin_Controller
                     // Using preg_replace to remove non-digit characters from quantity
                     $quantity = isset($value->quantity) ? preg_replace('/[^0-9.]/', '', $value->quantity) : 0;
                     $price = isset($value->purchase_price) ? $value->purchase_price : 0;
-                    if($quantity > 0){
+                    if ($quantity > 0) {
                         $amount = $price;
                     }
                     // $amount = $price;
-                    
+
                     $inventory_data[] = array(
                         'name' => isset($value->name) ? $value->name : 'Unknown Item',
                         'amount' => $amount,
@@ -1641,27 +1655,28 @@ class Financereports extends Admin_Controller
                     );
                 }
             }
-            
+
             return $inventory_data;
         } catch (Exception $e) {
             // Return empty array if there's an error
             return array();
         }
     }
-    
-    private function getBookInventoryData($start_date, $end_date) {
+
+    private function getBookInventoryData($start_date, $end_date)
+    {
         try {
             // Load the Book_model if not already loaded
             if (!isset($this->book_model)) {
                 $this->load->model('book_model');
             }
-            
+
             // Get book inventory data within date range
             $bookresult = $this->book_model->bookinventory($start_date, $end_date);
-            
+
             // Parse the JSON result
             $resultlist = json_decode($bookresult);
-            
+
             // Process data to match expected format
             $book_data = array();
             // Check if resultlist is not null and has data property
@@ -1671,7 +1686,7 @@ class Financereports extends Admin_Controller
                     $quantity = isset($value->qty) ? $value->qty : 0;
                     $price = isset($value->perunitcost) ? $value->perunitcost : 0;
                     $amount = $price;
-                    
+
                     $book_data[] = array(
                         'name' => isset($value->book_title) ? $value->book_title : 'Unknown Book',
                         'amount' => $amount,
@@ -1679,7 +1694,7 @@ class Financereports extends Admin_Controller
                     );
                 }
             }
-            
+
             return $book_data;
         } catch (Exception $e) {
             // Return empty array if there's an error
@@ -1687,7 +1702,7 @@ class Financereports extends Admin_Controller
         }
     }
 
-     public function profitlossreportbyclass()
+    public function profitlossreportbyclass()
     {
         if (!$this->rbac->hasPrivilege('profit_loss_report_by_class', 'can_view')) {
             access_denied();
@@ -1699,7 +1714,7 @@ class Financereports extends Admin_Controller
         $this->load->model('studentfeemaster_model');
         $this->load->model('Payroll_model');
         $this->load->model('Assets_model');
-        
+
         // Check if onlinestudent_model exists and load it
         $online_admission_model_exists = file_exists(APPPATH . 'models/Onlinestudent_model.php');
         if ($online_admission_model_exists) {
@@ -1742,13 +1757,13 @@ class Financereports extends Admin_Controller
         $data['depreciation_result'] = array();
         $data['inventory_result'] = array();
         $data['bookinventory_result'] = array();
-        
+
         // Initialize total variables
         $total_fee_billing = 0;
         $total_online_admission = 0;
         $total_inventory = 0;
         $total_bookinventory = 0;
-        
+
         // Only fetch data if class_id is selected
         if ($class_id != null && $class_id != '') {
             // Get income data
@@ -1756,7 +1771,7 @@ class Financereports extends Admin_Controller
 
             // Get expense data
             $data['expense_result'] = $this->expense_model->searchByType($start_date, $end_date, $class_id);
-            
+
             // Get online admission fees collection data (if model exists)
             $total_online_admission = 0;
             if ($online_admission_model_exists) {
@@ -1771,7 +1786,7 @@ class Financereports extends Admin_Controller
                     }
                 }
             }
-            
+
             // Get fee billing data (outstanding fees)
             $total_fee_billing = 0;
             if (method_exists($this->studentfeemaster_model, 'getFeeCollectionReport')) {
@@ -1783,20 +1798,20 @@ class Financereports extends Admin_Controller
                     }
                 }
             }
-            
+
             // Get payroll data
             $data['payroll_result'] = $this->getPayrollData($start_date, $end_date, $class_id);
-            
+
             // Get depreciation data
             $data['depreciation_result'] = $this->getDepreciationData($start_date, $end_date, $class_id);
-            
+
             // Get inventory purchase data
             $data['inventory_result'] = $this->getInventoryData($start_date, $end_date, $class_id);
-            
+
             // Get book inventory data
             $data['bookinventory_result'] = $this->getBookInventoryData($start_date, $end_date, $class_id);
         }
-        
+
         // Get currency symbol
         $data['currency_symbol'] = $this->customlib->getSchoolCurrencyFormat();
 
@@ -1810,7 +1825,7 @@ class Financereports extends Admin_Controller
             foreach ($data['income_result'] as $income) {
                 $head = isset($income['income_category']) ? $income['income_category'] : 'Unknown';
                 $amount = isset($income['amount']) ? $income['amount'] : 0;
-                
+
                 if (!isset($income_by_head[$head])) {
                     $income_by_head[$head] = 0;
                 }
@@ -1824,7 +1839,7 @@ class Financereports extends Admin_Controller
                 $total_expense += isset($expense['amount']) ? $expense['amount'] : 0;
             }
         }
-        
+
         // Add online admission fees to income
         // Add online admission fees to income
         if (!empty($data['online_admission_fees'])) {
@@ -1832,24 +1847,24 @@ class Financereports extends Admin_Controller
                 $total_income += isset($fee->amount) ? $fee->amount : 0;
             }
         }
-        
+
         // Add fee billing to income (as receivable)
         $total_income += $total_fee_billing;
-        
+
         // Add payroll to expense
         if (!empty($data['payroll_result'])) {
             foreach ($data['payroll_result'] as $payroll) {
                 $total_expense += isset($payroll['net_salary']) ? $payroll['net_salary'] : 0;
             }
         }
-        
+
         // Add depreciation to expense
         if (!empty($data['depreciation_result'])) {
             foreach ($data['depreciation_result'] as $depreciation) {
                 $total_expense += isset($depreciation['amount']) ? $depreciation['amount'] : 0;
             }
         }
-        
+
         // Add book inventory to expense
         $total_bookinventory = 0;
         if (!empty($data['bookinventory_result'])) {
@@ -1858,7 +1873,7 @@ class Financereports extends Admin_Controller
             }
         }
         $total_expense += $total_bookinventory;
-        
+
         // Add inventory to expense
         $total_inventory = 0;
         if (!empty($data['inventory_result'])) {

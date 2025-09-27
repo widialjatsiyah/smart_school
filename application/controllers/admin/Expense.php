@@ -241,6 +241,8 @@ class Expense extends Admin_Controller
         $this->session->set_userdata('top_menu', 'Expenses');
         $this->session->set_userdata('sub_menu', 'expense/expensesearch');
         $data['title'] = 'Search Expense';
+        $class               = $this->class_model->get();
+        $data['classlist']   = $class;
         $this->load->view('layout/header', $data);
         $this->load->view('admin/expense/expenseSearch', $data);
         $this->load->view('layout/footer', $data);
@@ -304,6 +306,7 @@ class Expense extends Admin_Controller
         $button_type = $this->input->post('button_type');
         if ($button_type == "search_filter") {
             $this->form_validation->set_rules('search_type', $this->lang->line('search_type'), 'required|trim|xss_clean');
+            $this->form_validation->set_rules('class_id', $this->lang->line('class'), 'required|trim|xss_clean');
         } elseif ($button_type == "search_full") {
             $this->form_validation->set_rules('search_text', $this->lang->line('keyword'), 'required|trim|xss_clean');
         }
@@ -311,6 +314,7 @@ class Expense extends Admin_Controller
             $error = array();
             if ($button_type == "search_filter") {
                 $error['search_type'] = form_error('search_type');
+                $error['class_id'] = form_error('class_id');
             } elseif ($button_type == "search_full") {
                 $error['search_text'] = form_error('search_text');
             }
@@ -324,12 +328,13 @@ class Expense extends Admin_Controller
             $date_to     = "";
 
             $search_type = $this->input->post('search_type');
+            $class_id = $this->input->post('class_id');
             if ($search_type == 'period') {
                 $date_from = $this->input->post('date_from');
                 $date_to   = $this->input->post('date_to');
             }
 
-            $params = array('button_type' => $button_type, 'search_type' => $search_type, 'search_text' => $search_text, 'date_from' => $date_from, 'date_to' => $date_to);
+            $params = array('button_type' => $button_type, 'search_type' => $search_type, 'search_text' => $search_text, 'date_from' => $date_from, 'date_to' => $date_to, 'class_id' => $class_id);
             $array  = array('status' => 1, 'error' => '', 'params' => $params);
             echo json_encode($array);
         }
@@ -340,6 +345,7 @@ class Expense extends Admin_Controller
         $search_type = $this->input->post('search_type');
         $button_type = $this->input->post('button_type');
         $search_text = $this->input->post('search_text');
+        $class_id = $this->input->post('class_id');
 
         if ($button_type == 'search_filter') {
             if ($search_type != "") {
@@ -354,14 +360,14 @@ class Expense extends Admin_Controller
                 $dates       = $this->customlib->get_betweendate('this_year');
                 $search_type = '';
             }
-
+            $class_id          = $this->input->post('class_id');
             $dateformat        = $this->customlib->getSchoolDateFormat();
             $date_from         = date('Y-m-d', strtotime($dates['from_date']));
             $date_to           = date('Y-m-d', strtotime($dates['to_date']));
             $data['exp_title'] = 'Expense Result From ' . date($dateformat, strtotime($date_from)) . " To " . date($dateformat, strtotime($date_to));
             $date_from         = date('Y-m-d', $this->customlib->dateYYYYMMDDtoStrtotime($date_from));
             $date_to           = date('Y-m-d', $this->customlib->dateYYYYMMDDtoStrtotime($date_to));
-            $resultList        = $this->expense_model->search("", $date_from, $date_to);
+            $resultList        = $this->expense_model->search("", $date_from, $date_to, $class_id);
 
         } else {
 

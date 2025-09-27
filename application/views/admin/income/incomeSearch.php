@@ -29,24 +29,33 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                 <form role="form" id="form1" action="<?php echo site_url('admin/income/checkvalidation') ?>" method="post" class="">
                                         <?php echo $this->customlib->getCSRF(); ?>
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-8">
                                 <div class="row">
 
                                         <div class="col-sm-6 col-md-6">
                                             <div class="form-group">
                                                 <label><?php echo $this->lang->line('search_type'); ?></label><small class="req"> *</small>
-                                                <select class="form-control" name="search_type" id="search_type" onchange="showdate(this.value)">
-
-                                                    <?php foreach ($searchlist as $key => $search) {
-    ?>
-                                                        <option value="<?php echo $key ?>" <?php
-if ((isset($search_type)) && ($search_type == $key)) {
-        echo "selected";
-    }
-    ?>><?php echo $search ?></option>
-                                                            <?php }?>
+                                                <select class="form-control" name="search_type" id="search_type" onchange="showdate(this.value)"><?php foreach ($searchlist as $key => $search) { ?> <option  value="<?php echo $key ?>" <?php if ((isset($search_type)) && ($search_type == $key)) { echo "selected";}?>><?php echo $search ?></option><?php }?>
                                                 </select>
                                                 <span class="text-danger" id="error_search_type"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 col-md-6">
+                                            <div class="form-group">
+                                                <label><?php echo $this->lang->line('class'); ?></label> <small class="req"> *</small>
+                                                <select autofocus="" id="class_id" name="class_id" class="form-control">
+                                                    <option value=""><?php echo $this->lang->line('select'); ?></option>
+                                                    <?php
+                                                    $count = 0;
+                                                    foreach ($classlist as $class) {
+                                                    ?>
+                                                        <option value="<?php echo $class['id'] ?>" <?php if (set_value('class_id') == $class['id']) {  echo "selected=selected";}?>><?php echo $class['class'] ?></option>
+                                                    <?php
+                                                        $count++;
+                                                    }
+                                                    ?>
+                                                </select>
+                                                <span class="text-danger" id="error_class_id"></span>
                                             </div>
                                         </div>
                                         <div id='date_result'>
@@ -59,7 +68,7 @@ if ((isset($search_type)) && ($search_type == $key)) {
                                         </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="row">
 
                                         <?php echo $this->customlib->getCSRF(); ?>

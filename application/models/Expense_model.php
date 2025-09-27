@@ -19,31 +19,46 @@ class Expense_model extends MY_Model
      * @param int $id
      * @return mixed
      */
-    public function search($text = null, $start_date = null, $end_date = null)
+    public function search($text = null, $start_date = null, $end_date = null, $class_id = null)
     {
+
+        $class_section = $this->customlib->get_myClassSection();
+
         if (!empty($text)) {
 
             $this->datatables
-                ->select('expenses.id,expenses.date,expenses.invoice_no,expenses.name,expenses.amount,expenses.documents,expenses.note,expense_head.exp_category,expenses.exp_head_id')
+                ->select('expenses.id,expenses.date,expenses.invoice_no,expenses.name,expenses.amount,expenses.documents,expenses.note,expense_head.exp_category,expenses.exp_head_id,classes.class as class')
                 ->searchable('expenses.name,expenses.invoice_no,exp_category,date,expenses.amount')
                 ->orderable('expenses.name,expenses.invoice_no,exp_category,date,expenses.amount')
                 ->join('expense_head', 'expenses.exp_head_id = expense_head.id')
+                ->join('classes', 'expenses.class_id = classes.id')
                 ->like('expenses.name', $text)
                 ->from('expenses');
-
+                
+            if ($class_section) {
+                $class_ids = array_keys($class_section);
+                $this->datatables->where_in('expenses.class_id', $class_ids);
+            }
         } else {
 
             $this->datatables
-                ->select('expenses.id,expenses.date,expenses.invoice_no,expenses.name,expenses.amount,expenses.documents,expenses.note,expense_head.exp_category,expenses.exp_head_id')
+                ->select('expenses.id,expenses.date,expenses.invoice_no,expenses.name,expenses.amount,expenses.documents,expenses.note,expense_head.exp_category,expenses.exp_head_id, classes.class as class')
                 ->searchable('expenses.name,expenses.invoice_no,exp_category,date,expenses.amount')
                 ->orderable('expenses.name,expenses.invoice_no,exp_category,date,expenses.amount')
                 ->join('expense_head', 'expenses.exp_head_id = expense_head.id')
+                ->join('classes', 'expenses.class_id = classes.id')
                 ->where('expenses.date <=', $end_date)
                 ->where('expenses.date >=', $start_date)
                 ->from('expenses');
+
+            if ($class_id != null) {
+                $this->datatables->where('expenses.class_id', $class_id);
+            } else  if ($class_section) {
+                $class_ids = array_keys($class_section);
+                $this->datatables->where_in('expenses.class_id', $class_ids);
+            }
         }
         return $this->datatables->generate('json');
-
     }
 
     public function get($id = null)
@@ -67,9 +82,9 @@ class Expense_model extends MY_Model
 
     public function getexpenselist($id = null)
     {
-        
+
         $class_section = $this->customlib->get_myClassSection();
-        
+
         $this->datatables
             ->select('expenses.id,expenses.date,expenses.name,expenses.invoice_no,expenses.amount,expenses.documents,expenses.note,expense_head.exp_category,expenses.exp_head_id, classes.class as class')
             ->searchable('expenses.id,expenses.date,expenses.name,expenses.invoice_no,expenses.amount,expenses.documents,expenses.note,expense_head.exp_category,expenses.exp_head_id, classes.class')
@@ -77,12 +92,12 @@ class Expense_model extends MY_Model
             ->from('expenses')
             ->join("expense_head", "expenses.exp_head_id = expense_head.id")
             ->join("classes", "expenses.class_id = classes.id");
-            
+
         if ($class_section) {
             $class_ids = array_keys($class_section);
             $this->datatables->where_in('expenses.class_id', $class_ids);
         }
-            
+
         return $this->datatables->generate('json');
     }
 
@@ -209,21 +224,20 @@ class Expense_model extends MY_Model
         return $r;
     }
 
-    public function searchByType($start_date, $end_date, $class_id = null) {
+    public function searchByType($start_date, $end_date, $class_id = null)
+    {
         $this->db->select('expenses.*,expense_head.exp_category');
         $this->db->from('expenses');
         $this->db->join('expense_head', 'expense_head.id = expenses.exp_head_id');
         $this->db->where('expenses.date >=', $start_date);
         $this->db->where('expenses.date <=', $end_date);
-        
+
         if ($class_id != null) {
             $this->db->where('expenses.class_id', $class_id);
         }
-        
+
         $this->db->order_by('expenses.date', 'ASC');
         $query = $this->db->get();
         return $query->result_array();
     }
-    
-
 }

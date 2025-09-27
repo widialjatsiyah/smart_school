@@ -239,6 +239,8 @@ class Income extends Admin_Controller
         $this->session->set_userdata('top_menu', 'Income');
         $this->session->set_userdata('sub_menu', 'income/incomesearch');
         $data['search_type'] = '';
+        $class               = $this->class_model->get();
+        $data['classlist']   = $class;
         $this->load->view('layout/header', $data);
         $this->load->view('admin/income/incomeSearch', $data);
         $this->load->view('layout/footer', $data);
@@ -281,7 +283,7 @@ class Income extends Admin_Controller
                     $row[] = $value->note;
                 }
 
-                $row[]     = ' [ ' . $value->class . ' ] '. $value->invoice_no;
+                $row[]     = ' [ ' . $value->class . ' ] ' . $value->invoice_no;
                 $row[]     = $this->customlib->dateformat($value->date);
                 $row[]     = $value->income_category;
                 $row[]     = $currency_symbol . amountFormat($value->amount);
@@ -305,6 +307,7 @@ class Income extends Admin_Controller
 
         if ($button_type == "search_filter") {
             $this->form_validation->set_rules('search_type', $this->lang->line('search') . " " . $this->lang->line('type'), 'required|trim|xss_clean');
+            $this->form_validation->set_rules('class_id', $this->lang->line('class'), 'required|trim|xss_clean');
         } elseif ($button_type == "search_full") {
             $this->form_validation->set_rules('search_text', $this->lang->line('keyword'), 'required|trim|xss_clean');
         }
@@ -313,6 +316,7 @@ class Income extends Admin_Controller
             $error = array();
             if ($button_type == "search_filter") {
                 $error['search_type'] = form_error('search_type');
+                $error['class_id'] = form_error('class_id');
             } elseif ($button_type == "search_full") {
                 $error['search_text'] = form_error('search_text');
             }
@@ -342,6 +346,7 @@ class Income extends Admin_Controller
         $search_type = $this->input->post('search_type');
         $button_type = $this->input->post('button_type');
         $search_text = $this->input->post('search_text');
+        $class_id = $this->input->post('class_id');
 
         if ($button_type == 'search_filter') {
             if ($search_type != "") {
@@ -361,7 +366,7 @@ class Income extends Admin_Controller
             $data['exp_title'] = 'Income Result From ' . date($dateformat, strtotime($date_from)) . " To " . date($dateformat, strtotime($date_to));
             $date_from         = date('Y-m-d', $this->customlib->dateYYYYMMDDtoStrtotime($date_from));
             $date_to           = date('Y-m-d', $this->customlib->dateYYYYMMDDtoStrtotime($date_to));
-            $resultList        = $this->income_model->search("", $date_from, $date_to);
+            $resultList        = $this->income_model->search("", $date_from, $date_to, $class_id);
         } else {
             $search_text = $this->input->post('search_text');
             $resultList  = $this->income_model->search($search_text, "", "");
