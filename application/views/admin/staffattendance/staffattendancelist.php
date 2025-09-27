@@ -152,11 +152,7 @@
                                             <?php
                                             foreach ($classlist as $key => $class) {
                                             ?>
-                                                <option value="<?php echo $class["type"] ?>" <?php
-                                                                                                if ($class["type"] == $user_type_id) {
-                                                                                                    echo "selected =selected";
-                                                                                                }
-                                                                                                ?>><?php print_r($class["type"]) ?></option>
+                                                <option value="<?php echo $class["type"] ?>" <?php if ($class["type"] == $user_type_id) {  echo "selected =selected"; }?>><?php print_r($class["type"]) ?></option>
                                             <?php
                                             }
                                             ?>

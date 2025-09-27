@@ -18,25 +18,24 @@ class Customlib
         $this->CI->load->model('Notification_model');
         $this->CI->load->model('Setting_model');
         $this->CI->load->model('Notificationsetting_model');
-		$this->CI->load->model('resume_model');
+        $this->CI->load->model('resume_model');
         $this->CI->load->model('paymentsetting_model');
-		
     }
 
     public function getBaseUrl()
     {
         $student = $this->CI->session->userdata('student');
         $admin    = $this->CI->session->userdata('admin');
-        
+
         if ($admin) {
             $base_url = $admin['db_array']['base_url'];
         } else if ($this->CI->session->userdata('student')) {
             $base_url = $student['db_array']['base_url'];
         } else {
-			$setting_result = $this->CI->setting_model->get();
-			$base_url = $setting_result[0]["base_url"];
-		}      
-        
+            $setting_result = $this->CI->setting_model->get();
+            $base_url = $setting_result[0]["base_url"];
+        }
+
         if ($base_url == "") {
             $base_url = base_url();
         }
@@ -44,20 +43,20 @@ class Customlib
     }
 
     public function getFolderPath()
-    {  
+    {
 
         $student = $this->CI->session->userdata('student');
-        $admin       = $this->CI->session->userdata('admin');        
-        
+        $admin       = $this->CI->session->userdata('admin');
+
         if ($admin) {
             $folder_path = $admin['db_array']['folder_path'];
         } else if ($this->CI->session->userdata('student')) {
-             $folder_path = $student['db_array']['folder_path'];
+            $folder_path = $student['db_array']['folder_path'];
         } else {
-			$setting_result = $this->CI->setting_model->get();
-			$base_url = $setting_result[0]["folder_path"];
-		}    
-        
+            $setting_result = $this->CI->setting_model->get();
+            $base_url = $setting_result[0]["folder_path"];
+        }
+
         if ($folder_path == "") {
             $folder_path = null;
         }
@@ -87,20 +86,20 @@ class Customlib
         $payment_type            = array();
         $payment_type['all']     = $this->CI->lang->line('all');
         $payment_type['balance'] = $this->CI->lang->line('balance');
-        $payment_type['paid']    = $this->CI->lang->line('no').' '.$this->CI->lang->line('balance');
+        $payment_type['paid']    = $this->CI->lang->line('no') . ' ' . $this->CI->lang->line('balance');
         return $payment_type;
     }
-     public function getGatewayProcessingFees($amount)
+    public function getGatewayProcessingFees($amount)
     {
-       $pay_method=$this->CI->paymentsetting_model->getActiveMethod();
-       $gateway_processing_charge=0;
-        if($pay_method->charge_type=='percentage'){
-        $gateway_processing_charge=(($amount * $pay_method->charge_value)/100);
-        }elseif($pay_method->charge_type=='fix'){
-            $gateway_processing_charge=$pay_method->charge_value;
-        }else{
-         $gateway_processing_charge=0;   
-        } 
+        $pay_method = $this->CI->paymentsetting_model->getActiveMethod();
+        $gateway_processing_charge = 0;
+        if ($pay_method->charge_type == 'percentage') {
+            $gateway_processing_charge = (($amount * $pay_method->charge_value) / 100);
+        } elseif ($pay_method->charge_type == 'fix') {
+            $gateway_processing_charge = $pay_method->charge_value;
+        } else {
+            $gateway_processing_charge = 0;
+        }
         return $gateway_processing_charge;
     }
     public function getCalltype()
@@ -480,7 +479,6 @@ class Customlib
             );
 
             $this->CI->session->set_userdata('front_site', $session_data);
-
         }
     }
 
@@ -491,12 +489,10 @@ class Customlib
 
         if ($admin) {
             return $admin['currency_format'];
-
         } else if ($this->CI->session->userdata('student')) {
 
             $student = $this->CI->session->userdata('student');
             return $student['currency_format'];
-
         } else {
             $setting_result = $this->CI->setting_model->get();
             if ($this->CI->session->has_userdata('front_site')) {
@@ -506,7 +502,6 @@ class Customlib
                     $front_userdata['currency_format'] = $setting_result[0]["currency_format"];
                     $this->CI->session->set_userdata('front_site', $front_userdata);
                 }
-
             } else {
                 $session_data = array(
                     'currency_format' => $setting_result[0]["currency_format"],
@@ -518,7 +513,6 @@ class Customlib
 
             return $front_site_data['currency_format'];
         }
-
     }
 
     public function getSchoolCurrency()
@@ -563,12 +557,10 @@ class Customlib
         if ($admin) {
 
             return $admin['currency_base_price'];
-
         } else if ($this->CI->session->userdata('student')) {
 
             $student = $this->CI->session->userdata('student');
             return $student['currency_base_price'];
-
         } else {
 
             $setting_result = $this->CI->setting_model->get();
@@ -580,16 +572,13 @@ class Customlib
 
                     $front_userdata['currency_base_price'] = $setting_result[0]["base_price"];
                     $this->CI->session->set_userdata('front_site', $front_userdata);
-
                 }
-
             } else {
 
                 $session_data = array(
                     'currency_base_price' => $setting_result[0]["base_price"],
                 );
                 $this->CI->session->set_userdata('front_site', $session_data);
-
             }
 
             $front_site_data = $this->CI->session->userdata('front_site');
@@ -601,7 +590,6 @@ class Customlib
     {
         $setting_result = $this->CI->setting_model->getSchoolDetail();
         return $setting_result->timezone;
-        
     }
 
     public function getStartWeek()
@@ -648,7 +636,6 @@ class Customlib
                     $front_userdata['currency_symbol'] = $setting_result[0]["currency_symbol"];
                     $this->CI->session->set_userdata('front_site', $front_userdata);
                 }
-
             } else {
                 $session_data = array(
                     'currency_symbol' => $setting_result[0]["currency_symbol"],
@@ -806,7 +793,8 @@ class Customlib
             $parent        = $this->CI->session->userdata;
             $parent_id     = $parent['student']['id'];
             $notifications = $this->CI->notification_model->countUnreadNotificationParent($parent_id);
-        }if ($user_role == "student") {
+        }
+        if ($user_role == "student") {
 
             $student_id    = $this->CI->customlib->getStudentSessionUserID();
             $notifications = $this->CI->notification_model->countUnreadNotificationStudent($student_id);
@@ -875,7 +863,7 @@ class Customlib
         $year        = date('Y');
 
         $start_date = "01-" . $start_month . "-" . $year;
-        $start_time = strtotime($start_date); 
+        $start_time = strtotime($start_date);
 
         for ($i = $start_month; $i < $start_month + 12; $i++) {
             $month = date('F', mktime(0, 0, 0, $i, 1));
@@ -909,7 +897,8 @@ class Customlib
             9  => $this->CI->lang->line('september'),
             10 => $this->CI->lang->line('october'),
             11 => $this->CI->lang->line('november'),
-            12 => $this->CI->lang->line('december'));
+            12 => $this->CI->lang->line('december')
+        );
         return $months;
     }
 
@@ -934,6 +923,22 @@ class Customlib
             return json_encode(array('id' => $roles[$role_key], 'name' => $role_key));
         }
     }
+
+    public function getRelatedStaff()
+    {
+        $this->CI->load->database();
+        $my_staff_id = $this->CI->session->userdata('admin')['id'];
+        $this->CI->db->select('DISTINCT(t2.staff_id)', FALSE);
+        $this->CI->db->from('class_teacher t1');
+        $this->CI->db->join('class_teacher t2', 't1.class_id = t2.class_id AND t1.session_id = t2.session_id');
+        $this->CI->db->where('t1.staff_id', $my_staff_id);
+        $this->CI->db->where('t2.staff_id !=', $my_staff_id);
+        $query = $this->CI->db->get();
+
+        // Ambil hanya staff_id dalam bentuk array
+        return array_column($query->result_array(), 'staff_id');
+    }
+
 
     public function getSchoolName()
     {
@@ -1211,7 +1216,6 @@ class Customlib
             } else {
                 // 24-hour time to 12-hour time
                 return $time_in_12_hour_format = date("g:i A", strtotime($time));
-
             }
         }
     }
@@ -1271,7 +1275,6 @@ class Customlib
             if ($format == 'Y/m/d') {
                 $format_date = $year . "/" . $month . "/" . $day . " " . $hour . ":" . $minute . ":" . $second;
             }
-
         } else {
             if ($format == 'd-m-Y') {
                 $format_date = $day . "-" . $month . "-" . $year . " " . $hour . ":" . $minute . " " . $am_pm;
@@ -1429,7 +1432,8 @@ class Customlib
                         'staff_recipient'    => $note_value->is_staff_recipient,
                         'template'           => $note_value->template,
                         'template_id'        => $note_value->template_id,
-                        'subject'            => $note_value->subject);
+                        'subject'            => $note_value->subject
+                    );
                 }
             }
         }
@@ -1479,7 +1483,9 @@ class Customlib
     {
         $string  = false;
         $pattern = sprintf(
-            '/%s(.+?)%s/ims', preg_quote($start, '/'), preg_quote($end, '/')
+            '/%s(.+?)%s/ims',
+            preg_quote($start, '/'),
+            preg_quote($end, '/')
         );
 
         if (preg_match($pattern, $str, $matches)) {
@@ -1515,15 +1521,15 @@ class Customlib
         }
     }
 
-    public function countincompleteTask($id,$role_id=null)
+    public function countincompleteTask($id, $role_id = null)
     {
-        $result = $this->CI->calendar_model->countincompleteTask($id,$role_id);
+        $result = $this->CI->calendar_model->countincompleteTask($id, $role_id);
         return $result;
     }
 
-    public function getincompleteTask($id,$role_id=null)
+    public function getincompleteTask($id, $role_id = null)
     {
-        $result = $this->CI->calendar_model->getincompleteTask($id,$role_id);
+        $result = $this->CI->calendar_model->getincompleteTask($id, $role_id);
         return $result;
     }
 
@@ -1580,7 +1586,6 @@ class Customlib
             $today      = strtotime('today 00:00:00');
             $first_date = date('Y-m-d', $today);
             $last_date  = date('Y-m-d', $today);
-
         } else if ($search_type == 'this_week') {
 
             $first_date = date("Y-m-d", strtotime("monday"));
@@ -1589,24 +1594,20 @@ class Customlib
                 $first_date = date("Y-m-d", strtotime("-1 week monday"));
                 $last_date  = date("Y-m-d", strtotime("sunday"));
             }
-
         } else if ($search_type == 'last_week') {
 
             $last_week_start = strtotime('-2 week monday 00:00:00');
             $last_week_end   = strtotime('-1 week sunday 23:59:59');
             $first_date      = date('Y-m-d', $last_week_start);
             $last_date       = date('Y-m-d', $last_week_end);
-
         } else if ($search_type == 'this_month') {
 
             $first_date = date('Y-m-01');
             $last_date  = date('Y-m-t 23:59:59.993');
-
         } else if ($search_type == 'last_month') {
 
             $first_date = date('Y-m-01', strtotime("-1 month"));
             $last_date  = date('Y-m-t', strtotime("-1 month"));
-
         } else if ($search_type == 'last_6_month') {
 
             $month = date("m", strtotime("-5 month"));
@@ -1615,38 +1616,32 @@ class Customlib
             $first_date = date($year . '-' . $month . '-01');
             $firstday   = date('Y-' . 'm' . '-01');
             $last_date  = date('Y-' . 'm' . '-' . date('t', strtotime($firstday)) . ' 23:59:59.993');
-
         } else if ($search_type == 'last_12_month') {
 
             $first_date = date('Y-m' . '-01', strtotime("-11 month"));
             $firstday   = date('Y-' . 'm' . '-01');
             $last_date  = date('Y-' . 'm' . '-' . date('t', strtotime($firstday)) . ' 23:59:59.993');
-
         } else if ($search_type == 'last_3_month') {
 
             $first_date = date('Y-m' . '-01', strtotime("-2 month"));
             $firstday   = date('Y-' . 'm' . '-01');
             $last_date  = date('Y-' . 'm' . '-' . date('t', strtotime($firstday)) . ' 23:59:59.993');
-
         } else if ($search_type == 'last_year') {
 
             $search_year = date('Y', strtotime("-1 year"));
             $first_date  = '01-01-' . $search_year;
             $last_date   = '31-12-' . $search_year;
-
         } else if ($search_type == 'this_year') {
 
             $search_year = date('Y');
 
             $first_date = '01-01-' . $search_year;
             $last_date  = '31-12-' . $search_year;
-
         } else if ($search_type == 'all time') {
 
             $search_year = date('Y');
             $first_date  = '01-01-' . $search_year;
             $last_date   = '31-12-' . $search_year;
-
         } else if ($search_type == 'period') {
 
             if (!empty($_POST['date_from'])) {
@@ -1660,7 +1655,6 @@ class Customlib
             } else {
                 $last_date = '';
             }
-            
         }
 
         return $date = array('from_date' => $first_date, 'to_date' => $last_date);
@@ -1759,7 +1753,8 @@ class Customlib
         $status = array(
             'both' => $this->CI->lang->line('all'),
             '1'    => $this->CI->lang->line('active'),
-            '2'    => $this->CI->lang->line('disabled'));
+            '2'    => $this->CI->lang->line('disabled')
+        );
         return $status;
     }
 
@@ -1768,7 +1763,8 @@ class Customlib
         $status = array(
             'both' => $this->CI->lang->line('all'),
             '1'    => $this->CI->lang->line('active'),
-            '2'    => $this->CI->lang->line('disabled'));
+            '2'    => $this->CI->lang->line('disabled')
+        );
 
         if ($id != null) {
             return $status[$id];
@@ -1811,7 +1807,7 @@ class Customlib
 
         if (isset($_POST['subject_group_id']) && $_POST['subject_group_id'] != '') {
             $filter_record['subject_group_id'] = $this->CI->messages_model->get_subject_groupname($_POST['subject_group_id']);
-        }       
+        }
 
         if (isset($_POST['subject_id']) && $_POST['subject_id'] != '') {
             $filter_record['subject_id'] = $this->CI->messages_model->get_subject_name($_POST['subject_id']);
@@ -1827,7 +1823,6 @@ class Customlib
 
         if (isset($_POST['group']) && $_POST['group'] != '') {
             $filter_record['group'] = $this->CI->lang->line('group_by') . ": " . $this->get_groupby($_POST['group']);
-
         }
 
         if (isset($_POST['head']) && $_POST['head'] != '') {
@@ -1835,18 +1830,14 @@ class Customlib
             if ($this->CI->uri->segment(2) == "incomegroup") {
 
                 $filter_record['head'] = $this->CI->messages_model->get_exphead_name($_POST['head']);
-
             } else {
 
                 $filter_record['head'] = $this->CI->messages_model->get_inchead_name($_POST['head']);
-
             }
-
         }
 
         if (isset($_POST['attendance_type']) && $_POST['attendance_type'] != '') {
             $filter_record['attendance_type'] = $this->CI->messages_model->get_attendance_type($_POST['attendance_type']);
-
         }
 
         if (isset($_POST['role']) && $_POST['role'] != '') {
@@ -1856,12 +1847,10 @@ class Customlib
             } else {
                 $filter_record['role'] = $this->CI->lang->line('role') . ": " . $_POST['role'];
             }
-
         }
 
         if (isset($_POST['exam_group_id']) && $_POST['exam_group_id'] != '') {
             $filter_record['exam_group_id'] = $this->CI->messages_model->get_exam_group($_POST['exam_group_id']);
-
         }
 
         if ((isset($_POST['exam_id']) && $_POST['exam_id'] != '')) {
@@ -1871,55 +1860,46 @@ class Customlib
             } else {
                 $filter_record['exam_id'] = $this->CI->messages_model->get_examname($_POST['exam_id']);
             }
-
         }
 
         if ((isset($_POST['session_id']) && $_POST['session_id'] != '')) {
 
             $filter_record['session_id'] = $this->CI->messages_model->get_sessionname($_POST['session_id']);
-
         }
 
         if ((isset($_POST['staff_status']) && $_POST['staff_status'] != '')) {
 
             $filter_record['staff_status'] = $this->CI->lang->line('status') . ": " . $this->staff_statusmessage($_POST['staff_status']);
-
         }
 
         if ((isset($_POST['designation']) && $_POST['designation'] != '')) {
 
             $filter_record['designation'] = $this->CI->messages_model->get_designation($_POST['designation']);
-
         }
 
         if ((isset($_POST['members_type']) && $_POST['members_type'] != '')) {
 
             $filter_record['members_type'] = $this->CI->lang->line('members_type') . ": " . $this->CI->lang->line($_POST['members_type']);
-
         }
 
         if ((isset($_POST['date_type']) && $_POST['date_type'] != '')) {
 
             $filter_record['date_type'] = $this->CI->lang->line('date_type') . ": " . $this->CI->lang->line($_POST['date_type']);
-
         }
 
         if ((isset($_POST['route_title']) && $_POST['route_title'] != '')) {
 
             $filter_record['route_title'] = $this->CI->lang->line('route_title') . ": " . $_POST['route_title'];
-
         }
 
         if ((isset($_POST['vehicle_no']) && $_POST['vehicle_no'] != '')) {
 
             $filter_record['vehicle_no'] = $this->CI->lang->line('vehicle_number') . ": " . $_POST['vehicle_no'];
+        }
 
-        } 
-        
         if ((isset($_POST['hostel_name']) && $_POST['hostel_name'] != '')) {
 
             $filter_record['hostel_name'] = $this->CI->lang->line('hostel_name') . ": " . $_POST['hostel_name'];
-
         }
 
         if (isset($_POST['search_type']) && $_POST['search_type'] != '') {
@@ -1929,16 +1909,14 @@ class Customlib
                 $filter_record['search_type'] = $this->CI->lang->line('search_type') . ": " . $_POST['date_from'] . " " . $this->CI->lang->line('to') . " " . $_POST['date_to'];
             } else {
                 $between_date                 = $this->get_betweendate($_POST['search_type']);
-               
+
                 $filter_record['search_type'] = $this->CI->lang->line('search_type') . ": " . date($this->getSchoolDateFormat(), strtotime($between_date['from_date'])) . " " . $this->CI->lang->line('to') . " " . date($this->getSchoolDateFormat(), strtotime($between_date['to_date']));
             }
-
         }
 
         foreach ($filter_record as $key => $value) {
             echo " (" . $value . ") ";
         }
-
     }
 
     public function is_biometricAttendence()
@@ -1975,7 +1953,7 @@ class Customlib
 
     public function getFullName($firstname, $middlename, $lastname, $is_middlename, $is_lastname)
     {
-       
+
         $name = "";
         if ($is_middlename) {
             $name = ($middlename == "") ? $firstname : $firstname . " " . $middlename;
@@ -2026,7 +2004,6 @@ class Customlib
 
         $status = $this->CI->onlinestudent_model->getfieldstatus($fieldname);
         return $status;
-
     }
 
     public function checkfieldexist($fieldname)
@@ -2058,23 +2035,23 @@ class Customlib
         return $status;
     }
 
-    public function generatebarcode($admission_no,$student_id, $default_return_code = 'barcode')
+    public function generatebarcode($admission_no, $student_id, $default_return_code = 'barcode')
     {
         $data = [];
         $code = $admission_no;
-       
+
         //load library
         $this->CI->load->library('zend');
         //load in folder Zend
         $this->CI->zend->load('Zend/Barcode');
         //generate barcode
         $imageResource = Zend_Barcode::factory('code128', 'image', array('text' => $code, 'barHeight' => 20), array())->draw();
-        imagepng($imageResource, 'uploads/student_id_card/barcodes/' . $student_id. '.png');
-        $barcode = 'uploads/student_id_card/barcodes/' . $student_id. '.png';
+        imagepng($imageResource, 'uploads/student_id_card/barcodes/' . $student_id . '.png');
+        $barcode = 'uploads/student_id_card/barcodes/' . $student_id . '.png';
 
         //=============qrcode=================
         $this->CI->load->library('QR_Code');
-        $qrcode =   $this->CI->qr_code->generate('uploads/student_id_card/qrcode/',$code,$student_id);
+        $qrcode =   $this->CI->qr_code->generate('uploads/student_id_card/qrcode/', $code, $student_id);
 
         if ($default_return_code == "barcode") {
             return $barcode;
@@ -2083,7 +2060,7 @@ class Customlib
         }
     }
 
-    public function generatestaffbarcode($employee_id,$staff_id,$default_return_code = 'barcode')
+    public function generatestaffbarcode($employee_id, $staff_id, $default_return_code = 'barcode')
     {
         //I'm just using rand() function for data example
         $data = [];
@@ -2096,15 +2073,15 @@ class Customlib
         $imageResource = Zend_Barcode::factory('code128', 'image', array('text' => $code, 'barHeight' => 20), array())->draw();
         imagepng($imageResource, 'uploads/staff_id_card/barcodes/' . $staff_id . '.png');
         $barcode = 'uploads/staff_id_card/barcodes/' . $staff_id . '.png';
-      //=============qrcode=================
-      $this->CI->load->library('QR_Code');
-      $qrcode =   $this->CI->qr_code->generate('uploads/staff_id_card/qrcode/',$code,$staff_id);
+        //=============qrcode=================
+        $this->CI->load->library('QR_Code');
+        $qrcode =   $this->CI->qr_code->generate('uploads/staff_id_card/qrcode/', $code, $staff_id);
 
-      if ($default_return_code == "barcode") {
-          return $barcode;
-      } elseif ($default_return_code == "qrcode") {
-          return 'uploads/staff_id_card/qrcode/' . $staff_id . '.png';
-      }
+        if ($default_return_code == "barcode") {
+            return $barcode;
+        } elseif ($default_return_code == "qrcode") {
+            return 'uploads/staff_id_card/qrcode/' . $staff_id . '.png';
+        }
     }
 
     public function get_myClassSection()
@@ -2149,9 +2126,7 @@ class Customlib
 
                 $condition .= " OR (" . $tbl . ".class_id=" . $class_section_array[$max_loop]['class_id'] . " AND " . $tbl . ".section_id=" . $class_section_array[$max_loop]['section_id'] . " )";
                 return $condition;
-
             }
-
         } else {
             return false;
         }
@@ -2195,133 +2170,136 @@ class Customlib
         $courses = $this->CI->Studentcourse_model->getPurchasedCourseId($userid, $courseid);
         return $courses;
     }
-    
+
     public function checkprofilesettingfieldexist($fieldname)
     {
         $status = $this->CI->student_edit_field_model->checkprofilesettingfieldexist($fieldname);
         return $status;
     }
-    
-    public function getCurrentSession(){
+
+    public function getCurrentSession()
+    {
 
         $return_session      = [];
         $session_array       = $this->CI->session->has_userdata('session_array');
-       
+
         if ($session_array) {
             $return_session      = $this->CI->session->userdata('session_array');
         } else {
             $setting             = $this->CI->setting_model->get();
             $return_session      = $setting[0]['current_session'];
         }
-       return  $return_session;
-
+        return  $return_session;
     }
 
-    public function checkcustomfieldexist($fieldname){
-		 
+    public function checkcustomfieldexist($fieldname)
+    {
+
         $status = $this->CI->resume_model->getfieldstatus($fieldname);
         return $status;
     }
 
-    public function getfieldcustomstatus($fieldname){
-		 
+    public function getfieldcustomstatus($fieldname)
+    {
+
         $status = $this->CI->resume_model->getfieldstatus($fieldname);
         return $status;
     }
 
-   public function get_additional_field_status($fieldname){
-         
+    public function get_additional_field_status($fieldname)
+    {
+
         $status = $this->CI->resume_model->get_additional_field_status($fieldname);
         return $status;
     }
 
-    public function get_user_dashboard_setting_status($fieldname){
-        
+    public function get_user_dashboard_setting_status($fieldname)
+    {
+
         $user       =   $this->CI->session->userdata('student');
         $user_role  =   $user['role'];
 
         if ($user_role == "student") {
             $status = $this->CI->student_model->get_student_dashboard_setting_status($fieldname);
-        }else if ($user_role == "parent") {
+        } else if ($user_role == "parent") {
             $status = $this->CI->student_model->get_parent_dashboard_setting_status($fieldname);
         }
         return $status;
     }
-	
-	//fees master  fees collect //
-    public function get_cumulative_fine_amount($fee_groups_feetype_id,$due_days){
-       
+
+    //fees master  fees collect //
+    public function get_cumulative_fine_amount($fee_groups_feetype_id, $due_days)
+    {
+
         $this->CI->load->model('studentfeemaster_model');
         $get_cumulative_data = $this->CI->studentfeemaster_model->get_cumulative_fine_amount($fee_groups_feetype_id);
-        $due_fine_amount=0;
-        $due_fine_amount1=0;
-		$day = 0;
-        if(count($get_cumulative_data)>0){
-            foreach($get_cumulative_data as $key=>$value){
-                if($value->fine_per_day==1){
+        $due_fine_amount = 0;
+        $due_fine_amount1 = 0;
+        $day = 0;
+        if (count($get_cumulative_data) > 0) {
+            foreach ($get_cumulative_data as $key => $value) {
+                if ($value->fine_per_day == 1) {
                     //fine will multiply after due days to fine amount
-					if ($due_days > $value->overdue_day) {
-						
-						// Case where the next cumulative data exists
-						if (!empty($get_cumulative_data[$key + 1]->overdue_day)) {
-							
-							// If the next overdue day is less than the due days, calculate fine based on the difference
-							if ($get_cumulative_data[$key + 1]->overdue_day < $due_days) {
-								$day = $get_cumulative_data[$key + 1]->overdue_day - $value->overdue_day;
-								$due_fine_amount1 = $value->fine_amount * $day;
-							} else {
-								// Otherwise, calculate the fine based on the difference between due days and current overdue day
-								$overduedays = $due_days - $value->overdue_day;
-								$due_fine_amount1 = $value->fine_amount * $overduedays;
-							}
-							
-						} else {
-							// Case where there is no next cumulative data
-							$overduedays = $due_days - $value->overdue_day;
-							$due_fine_amount1 = $value->fine_amount * $overduedays;
-						}
-						
-						// Add the calculated fine amount to the total due fine
-						$due_fine_amount += $due_fine_amount1;
-					 
-				   }				 
-					
-                }else{ 
+                    if ($due_days > $value->overdue_day) {
+
+                        // Case where the next cumulative data exists
+                        if (!empty($get_cumulative_data[$key + 1]->overdue_day)) {
+
+                            // If the next overdue day is less than the due days, calculate fine based on the difference
+                            if ($get_cumulative_data[$key + 1]->overdue_day < $due_days) {
+                                $day = $get_cumulative_data[$key + 1]->overdue_day - $value->overdue_day;
+                                $due_fine_amount1 = $value->fine_amount * $day;
+                            } else {
+                                // Otherwise, calculate the fine based on the difference between due days and current overdue day
+                                $overduedays = $due_days - $value->overdue_day;
+                                $due_fine_amount1 = $value->fine_amount * $overduedays;
+                            }
+                        } else {
+                            // Case where there is no next cumulative data
+                            $overduedays = $due_days - $value->overdue_day;
+                            $due_fine_amount1 = $value->fine_amount * $overduedays;
+                        }
+
+                        // Add the calculated fine amount to the total due fine
+                        $due_fine_amount += $due_fine_amount1;
+                    }
+                } else {
                     //fine will after due date
-                    if($due_days > $value->overdue_day){
-                        $due_fine_amount= $value->fine_amount;
+                    if ($due_days > $value->overdue_day) {
+                        $due_fine_amount = $value->fine_amount;
                     }
                 }
             }
             return $due_fine_amount;
-        }else{
+        } else {
             return false;
         }
 
         return false;
     }
-	
-	public function get_lesson_complete_status($section_id,$lesson_quiz_id){
+
+    public function get_lesson_complete_status($section_id, $lesson_quiz_id)
+    {
         $this->CI->load->model('Studentcourse_model');
-        $total_rows = $this->CI->Studentcourse_model->get_lesson_complete_status($section_id,$lesson_quiz_id);
+        $total_rows = $this->CI->Studentcourse_model->get_lesson_complete_status($section_id, $lesson_quiz_id);
         return $total_rows;
     }
 
-    public function get_online_course_curriculam_status($fieldname){
+    public function get_online_course_curriculam_status($fieldname)
+    {
         $this->CI->load->model('Course_model');
         $course_setting             = $this->CI->course_model->getOnlineCourseSettings();
-        $active_curriculam_status   = "" ;
-       
-        if($course_setting->course_curriculum_settings==null){
-            return $active_curriculam_status="hide"; 
-        }else{
-            $course_curriculum_settings = json_decode($course_setting->course_curriculum_settings); 
-            if(!empty($course_setting->course_curriculum_settings) && in_array("$fieldname",$course_curriculum_settings)){ 
-                return $active_curriculam_status="";
-            }else{
-                return $active_curriculam_status="hide";
+        $active_curriculam_status   = "";
+
+        if ($course_setting->course_curriculum_settings == null) {
+            return $active_curriculam_status = "hide";
+        } else {
+            $course_curriculum_settings = json_decode($course_setting->course_curriculum_settings);
+            if (!empty($course_setting->course_curriculum_settings) && in_array("$fieldname", $course_curriculum_settings)) {
+                return $active_curriculam_status = "";
+            } else {
+                return $active_curriculam_status = "hide";
             }
         }
     }
-
 }

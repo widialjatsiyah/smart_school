@@ -1,24 +1,26 @@
 <?php
-class Staffattendancemodel extends MY_Model {
+class Staffattendancemodel extends MY_Model
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->current_session = $this->setting_model->getCurrentSession();
         $this->current_date = $this->setting_model->getDateYmd();
     }
-    
+
     public function addorUpdate($attendances)
     {
         $this->db->trans_start();
         $this->db->trans_strict(false);
-      
-        if(!empty($attendances)){
+
+        if (!empty($attendances)) {
             foreach ($attendances as $attendance_key => $attendance_value) {
-                            
+
                 $this->db->where('staff_id',  $attendance_value['staff_id']);
                 $this->db->where('date', $attendance_value['date']);
                 $query = $this->db->get('staff_attendance');
-                
+
                 if ($query->num_rows() > 0) {
                     // Record exists, update it
                     $this->db->where('id', $query->row()->id);
@@ -27,8 +29,7 @@ class Staffattendancemodel extends MY_Model {
                     // Record does not exist, insert a new one
                     $this->db->insert('staff_attendance', $attendance_value);
                 }
-
-                }
+            }
         }
 
         $this->db->trans_complete();
@@ -39,10 +40,11 @@ class Staffattendancemodel extends MY_Model {
         } else {
             $this->db->trans_commit();
             return true;
-        }    
+        }
     }
 
-    public function get($id = null) {
+    public function get($id = null)
+    {
         $this->db->select()->join("staff", "staff.id = staff_attendance.staff_id")->from('staff_attendance');
         $this->db->where("staff.is_active", 1);
         if ($id != null) {
@@ -58,12 +60,14 @@ class Staffattendancemodel extends MY_Model {
         }
     }
 
-    public function getUserType() {
+    public function getUserType()
+    {
         $query = $this->db->query("select distinct user_type from staff where is_active = 1");
         return $query->result_array();
     }
 
-    public function searchAttendenceUserTypeWithMode($user_type, $date,$mode) {
+    public function searchAttendenceUserTypeWithMode($user_type, $date, $mode)
+    {
         $condition = '';
 
         if ($mode == 1) {
@@ -76,43 +80,60 @@ class Staffattendancemodel extends MY_Model {
 
         if ($this->session->has_userdata('admin')) {
             $getStaffRole     = $this->customlib->getStaffRole();
-            $staffrole   =   json_decode($getStaffRole);       
-            $superadmin_visible = $this->customlib->superadmin_visible(); 
-            if ($superadmin_visible == 'disabled' && $staffrole->id != 7) {                 
+            $staffrole   =   json_decode($getStaffRole);
+            $superadmin_visible = $this->customlib->superadmin_visible();
+            if ($superadmin_visible == 'disabled' && $staffrole->id != 7) {
                 $condition = " and roles.id != 7";
-            } 
+            }
         }
-        
-        if ($user_type == "select") { 
+        $userdata = $this->customlib->getUserData();
+        $relatedStaff = $this->customlib->getRelatedStaff();
+        // var_dump($relatedStaff);
+        if ($userdata["role_id"] == 14 && $relatedStaff != "") {
+            $condition .= " and staff.id IN (" . implode(',', $relatedStaff) . ")";
+        }
+
+        if ($user_type == "select") {
             $query = $this->db->query("select staff_attendance.id,staff_attendance.created_at as attendence_dt, staff_attendance.staff_attendance_type_id,staff_attendance.biometric_attendence,staff_attendance.qrcode_attendance,staff_attendance.user_agent,staff_attendance.biometric_device_data,staff_attendance.remark,staff.name,staff.surname,staff.employee_id,staff.contact_no,staff.email,roles.name as user_type,IFNULL(staff_attendance.date, 'xxx') as date,staff.id as staff_id, staff_attendance_type.type as `att_type`,staff_attendance_type.key_value as `key`,staff_attendance_type.long_lang_name,staff_attendance_type.long_name_style  from staff left join staff_roles on staff_roles.staff_id = staff.id left join roles on staff_roles.role_id = roles.id left join staff_attendance on (staff.id = staff_attendance.staff_id) and staff_attendance.date = " . $this->db->escape($date) . " left join staff_attendance_type on staff_attendance_type.id = staff_attendance.staff_attendance_type_id where staff.is_active = 1 $condition order by staff_attendance.created_at asc");
         } else {
             $query = $this->db->query("select staff_attendance.staff_attendance_type_id,staff_attendance.created_at as attendence_dt,staff_attendance.biometric_attendence,staff_attendance.qrcode_attendance,staff_attendance.user_agent,staff_attendance.biometric_device_data,staff_attendance.remark,staff.name,staff.surname,staff.employee_id,staff.contact_no,staff.email,roles.name as user_type,IFNULL(staff_attendance.date, 'xxx') as date, IFNULL(staff_attendance.id, 0) as id, staff.id as staff_id ,staff_attendance_type.type as `att_type`,staff_attendance_type.key_value as `key`,staff_attendance_type.long_lang_name,staff_attendance_type.long_name_style from staff left join staff_roles on (staff.id = staff_roles.staff_id) left join roles on (roles.id = staff_roles.role_id) left join staff_attendance on (staff.id = staff_attendance.staff_id) and staff_attendance.date = " . $this->db->escape($date) . " left join staff_attendance_type on staff_attendance_type.id = staff_attendance.staff_attendance_type_id where roles.name = " . $this->db->escape($user_type) . " and staff.is_active = 1 $condition order by staff_attendance.created_at asc");
-            
         }
         return $query->result_array();
     }
 
-    public function searchAttendenceUserType($user_type, $date) {
+    public function searchAttendenceUserType($user_type, $date)
+    {
         $condition = '';
         if ($this->session->has_userdata('admin')) {
             $getStaffRole     = $this->customlib->getStaffRole();
-            $staffrole   =   json_decode($getStaffRole);       
-            $superadmin_visible = $this->customlib->superadmin_visible(); 
-            if ($superadmin_visible == 'disabled' && $staffrole->id != 7) {                 
+            $staffrole   =   json_decode($getStaffRole);
+            $superadmin_visible = $this->customlib->superadmin_visible();
+            if ($superadmin_visible == 'disabled' && $staffrole->id != 7) {
                 $condition = " and roles.id != 7";
-            } 
+            }
         }
+
         
-        if ($user_type == "select") { 
+        $userdata = $this->customlib->getUserData();
+        $relatedStaff = $this->customlib->getRelatedStaff();
+        // var_dump($relatedStaff);
+        if ($userdata["role_id"] == 14 && $relatedStaff != "") {
+            $condition .= " and staff.id IN (" . implode(',', $relatedStaff) . ")";
+        }
+        // var_dump($condition);
+        // die();
+
+        if ($user_type == "select") {
 
             $query = $this->db->query("select staff_attendance.out_time,staff_attendance.in_time,staff_attendance.id,staff_attendance.created_at as attendence_dt, staff_attendance.staff_attendance_type_id,staff_attendance.biometric_attendence,staff_attendance.qrcode_attendance,staff_attendance.user_agent,staff_attendance.biometric_device_data,staff_attendance.remark,staff.name,staff.surname,staff.employee_id,staff.contact_no,staff.email,roles.name as user_type,roles.id as role_id,IFNULL(staff_attendance.date, 'xxx') as date,staff.id as staff_id, staff_attendance_type.type as `att_type`,staff_attendance_type.key_value as `key`,staff_attendance_type.long_lang_name,staff_attendance_type.long_name_style  from staff left join staff_roles on staff_roles.staff_id = staff.id left join roles on staff_roles.role_id = roles.id left join staff_attendance on (staff.id = staff_attendance.staff_id) and staff_attendance.date = " . $this->db->escape($date) . " left join staff_attendance_type on staff_attendance_type.id = staff_attendance.staff_attendance_type_id where staff.is_active = 1 $condition");
         } else {
-            $query = $this->db->query("select  staff_attendance.out_time,staff_attendance.in_time,staff_attendance.staff_attendance_type_id,staff_attendance.created_at as attendence_dt,staff_attendance.biometric_attendence,staff_attendance.qrcode_attendance,staff_attendance.user_agent,staff_attendance.biometric_device_data,staff_attendance.remark,staff.name,staff.surname,staff.employee_id,staff.contact_no,staff.email,roles.name as user_type,roles.id as role_id,IFNULL(staff_attendance.date, 'xxx') as date, IFNULL(staff_attendance.id, 0) as id, staff.id as staff_id ,staff_attendance_type.type as `att_type`,staff_attendance_type.key_value as `key`,staff_attendance_type.long_lang_name,staff_attendance_type.long_name_style from staff left join staff_roles on (staff.id = staff_roles.staff_id) left join roles on (roles.id = staff_roles.role_id) left join staff_attendance on (staff.id = staff_attendance.staff_id) and staff_attendance.date = " . $this->db->escape($date) . " left join staff_attendance_type on staff_attendance_type.id = staff_attendance.staff_attendance_type_id where roles.name = " . $this->db->escape($user_type) . " and staff.is_active = 1 $condition");            
+            $query = $this->db->query("select  staff_attendance.out_time,staff_attendance.in_time,staff_attendance.staff_attendance_type_id,staff_attendance.created_at as attendence_dt,staff_attendance.biometric_attendence,staff_attendance.qrcode_attendance,staff_attendance.user_agent,staff_attendance.biometric_device_data,staff_attendance.remark,staff.name,staff.surname,staff.employee_id,staff.contact_no,staff.email,roles.name as user_type,roles.id as role_id,IFNULL(staff_attendance.date, 'xxx') as date, IFNULL(staff_attendance.id, 0) as id, staff.id as staff_id ,staff_attendance_type.type as `att_type`,staff_attendance_type.key_value as `key`,staff_attendance_type.long_lang_name,staff_attendance_type.long_name_style from staff left join staff_roles on (staff.id = staff_roles.staff_id) left join roles on (roles.id = staff_roles.role_id) left join staff_attendance on (staff.id = staff_attendance.staff_id) and staff_attendance.date = " . $this->db->escape($date) . " left join staff_attendance_type on staff_attendance_type.id = staff_attendance.staff_attendance_type_id where roles.name = " . $this->db->escape($user_type) . " and staff.is_active = 1 $condition");
         }
         return $query->result_array();
     }
 
-    public function add($data) {
+    public function add($data)
+    {
         $this->db->trans_start(); # Starting Transaction
         $this->db->trans_strict(false); # See Note 01. If you wish can remove as well
         //=======================Code Start===========================
@@ -143,24 +164,26 @@ class Staffattendancemodel extends MY_Model {
         }
     }
 
-    public function getStaffAttendanceType() {
+    public function getStaffAttendanceType()
+    {
         $query = $this->db->select('*')->where("is_active", 'yes')->get("staff_attendance_type");
         return $query->result_array();
     }
 
-    public function searchAttendanceReport($user_type, $date) {
+    public function searchAttendanceReport($user_type, $date)
+    {
 
         if ($this->session->has_userdata('admin')) {
             $getStaffRole     = $this->customlib->getStaffRole();
-            $staffrole   =   json_decode($getStaffRole);       
-             
-            $superadmin_visible = $this->customlib->superadmin_visible(); 
+            $staffrole   =   json_decode($getStaffRole);
+
+            $superadmin_visible = $this->customlib->superadmin_visible();
             $condition = '';
             if ($superadmin_visible == 'disabled' && $staffrole->id != 7) {
-                $condition = "and staff_roles.role_id != 7";       
-            } 
+                $condition = "and staff_roles.role_id != 7";
+            }
         }
-        
+
         if ($user_type == "select") {
             $query = $this->db->query("select staff_attendance.staff_attendance_type_id,staff_attendance_type.type as `att_type`,staff_attendance_type.key_value as `key`,staff_attendance.remark,staff.name,staff.surname,staff.employee_id,staff.contact_no,staff.email,roles.name as user_type,IFNULL(staff_attendance.date, 'xxx') as date, IFNULL(staff_attendance.id, 0) as attendence_id, staff.id as id from staff left join staff_attendance on (staff.id = staff_attendance.staff_id) and staff_attendance.date = " . $this->db->escape($date) . " left join staff_attendance_type on staff_attendance_type.id = staff_attendance.staff_attendance_type_id left join staff_roles on staff_roles.staff_id = staff.id left join roles on staff_roles.role_id = roles.id where staff.is_active = 1 $condition");
         } else {
@@ -170,12 +193,14 @@ class Staffattendancemodel extends MY_Model {
         return $query->result_array();
     }
 
-    public function attendanceYearCount() {
+    public function attendanceYearCount()
+    {
         $query = $this->db->select("distinct year(date) as year")->get("staff_attendance");
         return $query->result_array();
     }
 
-    public function searchStaffattendance($date, $staff_id, $active_staff = true) {
+    public function searchStaffattendance($date, $staff_id, $active_staff = true)
+    {
 
         $sql = "select staff_attendance.staff_attendance_type_id,staff_attendance_type.type as `att_type`,staff_attendance_type.key_value as `key`,staff_attendance.remark,staff.name,staff.surname,staff.contact_no,staff.email,roles.name as user_type,IFNULL(staff_attendance.date, 'xxx') as date, IFNULL(staff_attendance.id, 0) as attendence_id, staff.id as id from staff left join staff_attendance on (staff.id = staff_attendance.staff_id) and staff_attendance.date = " . $this->db->escape($date) . " left join staff_roles on staff_roles.staff_id = staff.id left join roles on staff_roles.role_id = roles.id left join staff_attendance_type on staff_attendance_type.id = staff_attendance.staff_attendance_type_id where staff.id = " . $this->db->escape($staff_id);
         if ($active_staff || !isset($active_staff)) {
@@ -229,7 +254,7 @@ class Staffattendancemodel extends MY_Model {
     public function staff_schedule_hours($staff_id, $in_time)
     {
         $date = date('Y-m-d');
-        $sql    = "SELECT staff_roles.role_id,staff_attendence_schedules.staff_attendence_type_id as staff_attendence_schedule_staff_attendence_type_id,staff_attendence_schedules.entry_time_from,staff_attendence_schedules.entry_time_to,staff_attendence_schedules.total_institute_hour FROM `staff` INNER JOIN staff_roles on staff_roles.staff_id=staff.id INNER join staff_attendence_schedules on staff_attendence_schedules.role_id = staff_roles.role_id WHERE staff.id=" . $this->db->escape($staff_id);     
+        $sql    = "SELECT staff_roles.role_id,staff_attendence_schedules.staff_attendence_type_id as staff_attendence_schedule_staff_attendence_type_id,staff_attendence_schedules.entry_time_from,staff_attendence_schedules.entry_time_to,staff_attendence_schedules.total_institute_hour FROM `staff` INNER JOIN staff_roles on staff_roles.staff_id=staff.id INNER join staff_attendence_schedules on staff_attendence_schedules.role_id = staff_roles.role_id WHERE staff.id=" . $this->db->escape($staff_id);
 
         $current_time = date('H:i:s');
         $query  = $this->db->query($sql);
@@ -241,7 +266,7 @@ class Staffattendancemodel extends MY_Model {
             $total_spend_time = $time_current_seconds - $time_entry_seconds;
 
             $result = $query->result();
-            $find_array = array();           
+            $find_array = array();
 
             foreach ($result as $result_key => $result_value) {
 
@@ -268,6 +293,4 @@ class Staffattendancemodel extends MY_Model {
             return false;
         }
     }
-
-
 }
