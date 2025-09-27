@@ -763,6 +763,11 @@ class Staff_model extends MY_Model
 
     public function getStaffbyrole($id)
     {
+        $relatedStaf = $this->customlib->getRelatedStaff();
+        $userdata = $this->customlib->getUserData();
+        // var_dump($relatedStaf);
+        // die();
+
         $this->db->select('staff.*,staff_designation.designation as designation,staff_roles.role_id, department.department_name as department,roles.name as user_type');
         $this->db->join("staff_designation", "staff_designation.id = staff.designation", "left");
         $this->db->join("department", "department.id = staff.department", "left");
@@ -770,6 +775,9 @@ class Staff_model extends MY_Model
         $this->db->join("roles", "staff_roles.role_id = roles.id", "left");
         $this->db->where("staff_roles.role_id", $id);
         $this->db->where("staff.is_active", "1");
+        if (!empty($relatedStaf) && $userdata['role_id'] == 14) {
+            $this->db->where_in("staff.id", $relatedStaf);
+        }
         $this->db->from('staff');
         $query = $this->db->get();
         return $query->result_array();
