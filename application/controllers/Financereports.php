@@ -1607,7 +1607,7 @@ class Financereports extends Admin_Controller
         }
     }
     
-    private function getInventoryData($start_date, $end_date) {
+    private function getInventoryData($start_date, $end_date, $class_id = null) {
         try {
             // Load the Itemstock_model if not already loaded
             if (!isset($this->itemstock_model)) {
@@ -1615,7 +1615,7 @@ class Financereports extends Admin_Controller
             }
             
             // Get inventory purchase data within date range
-            $itemresult = $this->itemstock_model->get_ItemByBetweenDate($start_date, $end_date);
+            $itemresult = $this->itemstock_model->get_ItemByBetweenDate($start_date, $end_date, $class_id);
             
             // Parse the JSON result
             $resultlist = json_decode($itemresult);

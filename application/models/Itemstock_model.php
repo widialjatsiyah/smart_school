@@ -126,7 +126,7 @@ class Itemstock_model extends MY_Model
         return $this->datatables->generate('json');
     }
 
-    public function get_ItemByBetweenDate($start_date, $end_date)
+    public function get_ItemByBetweenDate($start_date, $end_date, $class_id = null)
     {
         $this->db->select('`item_stock`.*, `item`.`name`, `item`.`item_category_id`, `item`.`description` as `des`, `item_category`.`item_category`, `item_supplier`.`item_supplier`, `item_store`.`item_store`');
         $this->db->from('item_stock');
@@ -136,6 +136,9 @@ class Itemstock_model extends MY_Model
         $this->db->join('item_store', 'item_store.id = item_stock.store_id', 'left outer');
         $this->db->where("date_format(item_stock.date,'%Y-%m-%d') >=", $start_date);
         $this->db->where("date_format(item_stock.date,'%Y-%m-%d') <=", $end_date);
+        if ($class_id != null) {
+            $this->db->where('item_stock.class_id', $class_id);
+        }
         $this->db->order_by('item_stock.id', 'desc');
 
         $query = $this->db->get();
